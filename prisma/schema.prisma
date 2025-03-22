@@ -1,0 +1,365 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            Int
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  refresh_token_expires_in Int?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       Int
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id                Int                 @id @default(autoincrement())
+  name              String?
+  password          String?             @db.Text
+  email             String?             @unique
+  emailVerified     DateTime?
+  image             String?
+  job_title         String?
+  company           String?
+  twitter           String?
+  instagram         String?
+  linkedin          String?
+  role              String?             @default("user")
+  accounts          Account[]
+  sessions          Session[]
+  user_otp          Int?
+  total_revenue     Decimal?            @db.Decimal(10, 2)
+  current_balance   Decimal?            @db.Decimal(10, 2)
+  request_approved  Boolean?            @default(true)
+  affiliateCode     String?             @unique
+  created_at        DateTime            @default(now()) // Add this line
+  tickets           tickets[] // Add this line for the relation
+  events            events[] // Add this line for the relation
+  notifications     notifications[] // Add this line
+  streamSessions    StreamSession[]
+  affiliateRevenues AffiliateRevenue[]
+  referredUsers     AffiliateTracking[] @relation("affiliate")
+  referredByUser    AffiliateTracking[] @relation("customer")
+  movies            Movie[] // Opposite relation for Movie.user
+  watchLists        WatchList[] // Opposite relation for WatchList.user
+  creatorRevenues   CreatorRevenue[] // Opposite relation for CreatorRevenue.movie
+  creatorPayouts    CreatorPayout[] // Add this line
+  mailings          Mailing[]
+}
+
+model Movie {
+  id                   Int         @id @default(autoincrement())
+  imageString          String
+  title                String
+  age                  Int
+  duration             Float
+  overview             String
+  release              Int
+  videoSource          String
+  category             String
+  youtubeString        String
+  WatchLists           WatchList[]
+  price                Int?
+  userId               Int
+  user                 User        @relation(fields: [userId], references: [id])
+  totalviews           Int?
+  approval_status      String
+  isaffiliate          Boolean?    @default(false)
+  commissionPercentage Decimal?    @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+
+  affiliateRevenues AffiliateRevenue[]
+  creatorRevenues   CreatorRevenue[] // Opposite relation for CreatorRevenue.movie
+
+  @@index([category]) // For category filtering
+  @@index([approval_status]) // For status filtering
+  @@index([userId, approval_status]) // For filtering user's movies by status
+  @@index([createdAt]) // For sorting by date
+}
+
+model purchased_videos {
+  id          Int      @id @default(autoincrement())
+  user_email  String?
+  youtube_url String
+  createdAt   DateTime @default(now())
+}
+
+model WatchList {
+  id      Int    @id @default(autoincrement())
+  userId  Int
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Movie   Movie? @relation(fields: [movieId], references: [id])
+  movieId Int?
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model events {
+  id                   Int                @id @default(autoincrement())
+  title                String
+  date                 DateTime
+  bookingDate          DateTime
+  description          String
+  price                Int
+  totalTickets         Int
+  availableTickets     Int
+  imageUrl             String?            @db.Text
+  streamUrl            String?            @db.Text // For YouTube stream URL
+  trailerUrl           String?
+  recordingUrl         String?            @db.Text // New field for recording URL
+  allowRecordingAccess Boolean            @default(false) // Flag to control recording access
+  recordingAccessCode  String?            @unique // Unique code for recording access
+  isLive               Boolean            @default(false)
+  agoraChannel         String             @unique @default(uuid()) // Auto-generate unique channel
+  activeStreams        Int                @default(0) // Track number of active streams
+  maxCoStreamers       Int                @default(4) // Maximum allowed co-streamers
+  defaultLayout        String             @default("grid") // Default stream layout
+  streamLayout         Json? // Custom layout configuration
+  isMultiStream        Boolean            @default(false) // Flag for multi-device streaming
+  created_at           DateTime           @default(now())
+  user                 User               @relation(fields: [userId], references: [id])
+  userId               Int // Creator's user ID
+  status               String             @default("upcoming") // upcoming, live, ended
+  isaffiliate          Boolean            @default(false)
+  commissionPercentage Decimal?           @db.Decimal(10, 2)
+  isTopRated           Boolean            @default(false) // Add this line
+  soldOut              Boolean            @default(false)
+  tickets              tickets[]
+  streamSessions       StreamSession[]
+  affiliateRevenues    AffiliateRevenue[]
+  creatorRevenues      CreatorRevenue[] // Opposite relation for CreatorRevenue.movie
+  // Newly added fields at the bottom
+  liveStreamURLs       Json?               @default("{}") // JSON field for multiple streaming URLs
+  streamVia            String?             @db.VarChar(100) // Streaming method
+  streamId             String?             @db.VarChar(255) // Stream ID
+
+  @@index([status, date]) // For filtering upcoming/past events
+  @@index([userId, status]) // For creator's events filtering
+  @@index([isLive, status]) // For live events filtering
+  @@index([streamVia]) // Index for filtering by streaming method
+  @@index([streamId]) // Index for quick lookups of stream IDs
+}
+
+// You should also consider adding a recording access log model
+// model RecordingAccess {
+//   id         Int      @id @default(autoincrement())
+//   eventId    Int
+//   userId     Int? // Optional as some users might access via invite code without account
+//   userEmail  String? // Optional email for tracking
+//   accessCode String // The code used for access
+//   accessTime DateTime @default(now())
+//   ipAddress  String? // Optional for security tracking
+//
+//   @@index([eventId])
+//   @@index([accessCode])
+// }
+
+model StreamSession {
+  id         Int      @id @default(autoincrement())
+  eventId    Int
+  userId     Int
+  deviceType String // 'webcam', 'mobile', 'screen'
+  active     Boolean  @default(true)
+  layout     String   @default("grid") // 'grid', 'spotlight', 'sideBySide'
+  position   Int      @default(0) // For ordering streams in layout
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  event      events   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("StreamSession")
+}
+
+model tickets {
+  id           Int       @id @default(autoincrement())
+  ticketCode   String    @unique
+  qrCode       String    @unique
+  purchaseDate DateTime  @default(now())
+  status       String    @default("active") // active, used, cancelled
+  event        events    @relation(fields: [eventId], references: [id])
+  eventId      Int
+  user         User      @relation(fields: [userId], references: [id])
+  userId       Int
+  payment      payments?
+  created_at   DateTime  @default(now())
+
+  @@index([status, eventId]) // For checking ticket availability
+  @@index([userId, status]) // For user's tickets filtering
+  @@index([purchaseDate]) // For sorting/reporting
+}
+
+model payments {
+  id            Int      @id @default(autoincrement())
+  amount        Int
+  status        String // pending, completed, failed
+  paymentMethod String
+  transactionId String   @unique
+  createdAt     DateTime @default(now())
+  ticket        tickets  @relation(fields: [ticketId], references: [id])
+  ticketId      Int      @unique
+  updatedAt     DateTime @updatedAt
+  metadata      Json? // For storing additional payment details
+  refund        refunds? // Link to refund if payment was refunded
+
+  @@index([status, createdAt]) // For payment reports
+  @@index([paymentMethod]) // For payment method analytics
+}
+
+model notifications {
+  id            Int       @id @default(autoincrement())
+  userId        Int
+  user          User      @relation(fields: [userId], references: [id])
+  title         String
+  message       String
+  type          String // event_reminder, ticket_purchased, payment_confirmed, stream_starting
+  is_read       Boolean   @default(false)
+  created_at    DateTime  @default(now())
+  email_sent    Boolean   @default(false)
+  email_sent_at DateTime?
+  metadata      Json? // For storing additional data like eventId, ticketId etc.
+}
+
+model AffiliateRevenue {
+  id          Int       @id @default(autoincrement())
+  affiliateId Int // Reference to User with affiliate role
+  affiliate   User      @relation(fields: [affiliateId], references: [id])
+  amount      Decimal   @db.Decimal(10, 2)
+  sourceType  String // 'movie' or 'event'
+  sourceId    Int // ID of the movie or event
+  isPaid      Boolean   @default(false)
+  paidAt      DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Additional fields for tracking
+  referredUserId Int? // The user who made the purchase
+  transactionId  String // Reference to payment transaction
+
+  // Add these relations
+  movie Movie?  @relation(fields: [sourceId], references: [id], map: "AffiliateRevenue_movieId_fkey")
+  event events? @relation(fields: [sourceId], references: [id], map: "AffiliateRevenue_eventId_fkey")
+
+  @@index([sourceId])
+  @@index([affiliateId])
+}
+
+model AffiliateTracking {
+  id              Int      @id @default(autoincrement())
+  userId          Int // The customer's user ID
+  affiliateUserId Int // The affiliate's user ID
+  createdAt       DateTime @default(now())
+
+  user          User @relation("customer", fields: [userId], references: [id])
+  affiliateUser User @relation("affiliate", fields: [affiliateUserId], references: [id])
+
+  @@unique([userId, affiliateUserId])
+}
+
+model CreatorRevenue {
+  id             Int            @id @default(autoincrement())
+  creatorId      Int // Reference to User with creator role
+  creator        User           @relation(fields: [creatorId], references: [id])
+  amount         Decimal        @db.Decimal(10, 2)
+  sourceType     String // 'movie' or 'event'
+  sourceId       Int // ID of the movie or event
+  isPaid         Boolean        @default(false)
+  paidAt         DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  referredUserId Int? // The user who made the purchase
+  transactionId  String // Reference to payment transaction
+  payoutId       Int? // Reference to the payout this revenue was included in
+  payout         CreatorPayout? @relation(fields: [payoutId], references: [id])
+
+  // Add these relations
+  movie Movie?  @relation(fields: [sourceId], references: [id], map: "CreatorRevenue_movieId_fkey")
+  event events? @relation(fields: [sourceId], references: [id], map: "CreatorRevenue_eventId_fkey")
+
+  @@index([sourceId])
+  @@index([creatorId])
+  @@index([payoutId])
+}
+
+model CreatorPayout {
+  id               Int              @id @default(autoincrement())
+  creatorId        Int
+  creator          User             @relation(fields: [creatorId], references: [id])
+  totalAmount      Decimal          @db.Decimal(10, 2) // Original full amount
+  commissionAmount Decimal          @db.Decimal(10, 2) // 25% of total
+  payoutAmount     Decimal          @db.Decimal(10, 2) // 75% of total
+  status           String // 'processing', 'completed', 'failed'
+  paymentMethod    String? // Method used to pay the creator
+  paymentDetails   Json? // Store payment gateway response or bank details
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  revenues         CreatorRevenue[] // Link to the revenue records included in this payout
+
+  @@index([creatorId])
+  @@index([status])
+}
+
+model refunds {
+  id            Int       @id @default(autoincrement())
+  paymentId     Int       @unique // Add @unique here
+  payment       payments  @relation(fields: [paymentId], references: [id])
+  amount        Decimal   @db.Decimal(10, 2)
+  status        String // 'pending', 'processing', 'completed', 'failed'
+  reason        String // 'duplicate_payment', 'customer_request', 'system_error', 'other'
+  refundedAt    DateTime?
+  transactionId String    @unique // Reference ID from payment gateway
+  paymentMethod String? // Method used for refund
+  metadata      Json? // Additional refund details
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([status])
+}
+
+model Mailing {
+  id        Int      @id @default(autoincrement())
+  title     String   @db.VarChar(255)
+  content   Json // Will store groups, customEmails, subject, and emailContent
+  status    String   @db.VarChar(50) // 'draft' or 'sent'
+  userId    Int // Creator/Admin who created this mailing
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}

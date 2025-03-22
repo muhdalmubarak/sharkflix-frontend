@@ -1,0 +1,32 @@
+# Connect to Supabase via connection pooling with Supavisor.
+DATABASE_URL="postgresql://postgres.zdcryvewjhsccriuzltq:5KMktadAVUL69FTu@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?schema=public&pgbouncer=true"
+# Direct connection to the database. Used for migrations.
+DIRECT_URL="postgresql://postgres.zdcryvewjhsccriuzltq:5KMktadAVUL69FTu@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres"
+
+EMAIL_SERVER_USER=resend
+EMAIL_SERVER_PASSWORD=re_MwRTSbSK_5GYgxA8nBcHX1YgfdnTvqqU8
+EMAIL_SERVER_HOST=smtp.resend.com
+EMAIL_SERVER_PORT=465
+EMAIL_FROM=onboarding@resend.dev
+NEXT_PUBLIC_RESEND_API_KEY=re_bzJjGfK3_GKBhsnji2GWTVT9ku3UsMJM2
+
+NEXT_PUBLIC_MAIN_DOMAIN_URL=https://www.sharkv.my
+NEXT_PUBLIC_URL=https://sharkflix-repo.vercel.app
+MAX_FILE_SIZE=50
+NEXT_PUBLIC_WS_URL=ws://localhost:8080
+YOUTUBE_API_KEY=AIzaSyD8Yk56pxZMJ6PepqFzQQNEkgg11e3QTf0
+NEXT_PUBLIC_AGORA_APP_ID=614988eb96014e94a48b17d3adeb7c9f
+AGORA_APP_CERTIFICATE=3ce288b40bf54dc9b99f9a3f4d130f63
+CLOUDFLARE_ACCOUNT_ID=90281db9b3fe4ab6e57c748477a07b90
+CLOUDFLARE_API_KEY=OvHUeRu3-pIDghG7wU5w8-nXDDS3-oH6UrrotcB5
+NEXT_PUBLIC_CLOUDFLARE_CUSTOMER_SUBDOMAIN=customer-i506418yko283pw5.cloudflarestream.com
+
+GOOGLE_CLIENT_ID="726022809010-1rjmkvmlm4ftqc1uor9vl3g6hoihrnn8.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET="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"
+
+
+KV_URL="rediss://default:AUUTAAIjcDFmM2JkOWI0ZGMzYmI0NTBhYWYxYzkxNTYzN2VjZjYzYXAxMA@noble-mastiff-17683.upstash.io:6379"
+KV_REST_API_READ_ONLY_TOKEN="AkUTAAIgcDEkMblMwJ264GU2y_nqs-td3sXJYv9AU_nv0JXX-8NxWA"
+KV_REST_API_TOKEN="AUUTAAIjcDFmM2JkOWI0ZGMzYmI0NTBhYWYxYzkxNTYzN2VjZjYzYXAxMA"
+KV_REST_API_URL="https://noble-mastiff-17683.upstash.io"
+
