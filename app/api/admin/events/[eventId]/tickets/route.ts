@@ -101,7 +101,7 @@ export async function GET(
         total,
         ...(stats.reduce((acc, stat) => ({
           ...acc,
-          [stat.status]: stat._count
+          [stat.status as string]: stat._count
         }), {}) as Record<string, number>)
       },
       pagination: {
