@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Loading secret environment variables"
+echo "Loading secret environment variables..."
 
 # Check if the `env` file exists and load it
 if [ -f env ]; then
@@ -31,19 +31,19 @@ if [ -z "$PARAMETERS" ] || [ "$PARAMETERS" == "[]" ]; then
 fi
 
 # Loop through and export each parameter
-echo "$PARAMETERS" | jq -c '.[]' | while read -r i; do
-    NAME=$(echo $i | jq -r '.[0]')   # Full AWS SSM parameter name
-    VALUE=$(echo $i | jq -r '.[1]')  # Secret value
-    ENV_NAME=$(basename "$NAME")     # Extract only last part of the path
+echo "$PARAMETERS" | tr -d '[]' | while IFS= read -r line; do
+    NAME=$(echo "$line" | sed -E 's/.*"([^"]+)",.*/\1/')
+    VALUE=$(echo "$line" | sed -E 's/.*"[^"]+",\s*"([^"]+)".*/\1/')
+    ENV_NAME=$(basename "$NAME")  # Extract only the last part of the path
 
     echo "Exporting $ENV_NAME"
 
     # Export to runtime and `.env` file
-    echo "export $ENV_NAME='$VALUE'" >> $BASH_ENV
+    echo "export $ENV_NAME='$VALUE'" >> "$BASH_ENV"
     echo "$ENV_NAME=$VALUE" >> .env
 done
 
 # Load new environment variables
-source $BASH_ENV
+source "$BASH_ENV"
 
 echo "Secret environment variables loaded successfully."
