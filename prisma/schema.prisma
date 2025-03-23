@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
 }
 
 datasource db {
@@ -164,9 +165,9 @@ model events {
   affiliateRevenues    AffiliateRevenue[]
   creatorRevenues      CreatorRevenue[] // Opposite relation for CreatorRevenue.movie
   // Newly added fields at the bottom
-  liveStreamURLs       Json?               @default("{}") // JSON field for multiple streaming URLs
-  streamVia            String?             @db.VarChar(100) // Streaming method
-  streamId             String?             @db.VarChar(255) // Stream ID
+  liveStreamURLs       Json?              @default("{}") // JSON field for multiple streaming URLs
+  streamVia            String?            @db.VarChar(100) // Streaming method
+  streamId             String?            @db.VarChar(255) // Stream ID
 
   @@index([status, date]) // For filtering upcoming/past events
   @@index([userId, status]) // For creator's events filtering
