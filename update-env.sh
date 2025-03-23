@@ -22,26 +22,26 @@ echo "Using AMPLIFY_APP_ID: $AMPLIFY_APP_ID"
 PARAMETER_PATH="/amplify/shared/$AMPLIFY_APP_ID/"
 
 # Fetch all parameters from AWS SSM
-PARAMETERS=$(aws ssm get-parameters-by-path --path "$PARAMETER_PATH" --with-decryption --recursive --query 'Parameters[*].[Name,Value]' --output json)
+PARAMETERS=$(aws ssm get-parameters-by-path --path "$PARAMETER_PATH" --with-decryption --recursive --query 'Parameters[*].[Name,Value]' --output text)
 
 # Check if parameters exist
-if [ -z "$PARAMETERS" ] || [ "$PARAMETERS" == "[]" ]; then
+if [ -z "$PARAMETERS" ]; then
     echo "No parameters found at $PARAMETER_PATH"
     exit 1
 fi
 
-# Loop through and export each parameter
-echo "$PARAMETERS" | tr -d '[]' | while IFS= read -r line; do
-    NAME=$(echo "$line" | sed -E 's/.*"([^"]+)",.*/\1/')
-    VALUE=$(echo "$line" | sed -E 's/.*"[^"]+",\s*"([^"]+)".*/\1/')
-    ENV_NAME=$(basename "$NAME")  # Extract only the last part of the path
+# Loop through parameters and export them
+while read -r NAME VALUE; do
+    if [[ -z "$NAME" || -z "$VALUE" ]]; then
+        continue  # Skip invalid entries
+    fi
 
-    echo "Exporting $ENV_NAME"
+    ENV_NAME=$(basename "$NAME")  # Extract only the last part of the path
 
     # Export to runtime and `.env` file
     echo "export $ENV_NAME='$VALUE'" >> "$BASH_ENV"
     echo "$ENV_NAME=$VALUE" >> .env
-done
+done <<< "$PARAMETERS"
 
 # Load new environment variables
 source "$BASH_ENV"
