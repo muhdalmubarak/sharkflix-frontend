@@ -57,7 +57,7 @@ export default   function EditVideo({movieid}:iMovie)  {
       .eq('id', movieid);  
       if(result?.data)
       {
-          var res  =result.data[0];
+          const res  =result.data[0];
           setPrice(res.price);
           setVideoTitle(res.title);
       }

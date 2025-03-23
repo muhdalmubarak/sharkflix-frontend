@@ -14,7 +14,7 @@ interface linkProps {
   href: string;
 }
 
-var links: linkProps[] = [
+let links: linkProps[] = [
   { name: "Home", href: "/creator-home" },
   // { name: "Tv Shows", href: "/home/shows" },
   { name: "My Videos", href: "/creator-home/recently" },

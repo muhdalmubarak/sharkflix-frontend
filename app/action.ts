@@ -40,7 +40,7 @@ export async function deleteFromWatchlist(formData: FormData) {
 
 export async function deleteVideo(formData: FormData) {
   "use server";
-  var id = Number(formData.get("movieId"));
+  const id = Number(formData.get("movieId"));
   const pathname = formData.get("pathname") as string;
 
   const data = await prisma.movie.delete({

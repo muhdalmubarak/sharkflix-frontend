@@ -69,7 +69,7 @@ async function movewVideos(userEmail:any,purchasedVideosUser:any) {
 export default async function MovieVideo(userEmail:any) {
   const data = await getData();
   let purchasedVideosUser;
-  let purchasedVideosUse = await purchasedVideos(userEmail);
+  const purchasedVideosUse = await purchasedVideos(userEmail);
   purchasedVideosUser = purchasedVideosUse?.filter((v)=>v.user_email == userEmail.userEmail) || []
   const purchasedMoview = await movewVideos(userEmail,purchasedVideosUser)
   console.log("purchaseMoview=6666==",purchasedMoview)

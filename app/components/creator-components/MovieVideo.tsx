@@ -111,7 +111,7 @@ export default async function MovieVideo() {
   const data = await getData(session?.user?.id as number);
   const userData = await getUserData(session?.user?.id as number);
   let purchasedVideosUser;
-  let purchasedVideosUse = await purchasedVideos();
+  const purchasedVideosUse = await purchasedVideos();
   const purchasedMoview = await movewVideos(
     session?.user?.id as number,
     purchasedVideosUse

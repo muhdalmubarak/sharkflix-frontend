@@ -67,7 +67,7 @@ export default async function Watchlist() {
   const data = await getData();
   const userEmail = session?.user?.email;
   let purchasedVideosUser;
-  let purchasedVideosUse = await purchasedVideos(userEmail);
+  const purchasedVideosUse = await purchasedVideos(userEmail);
   purchasedVideosUser = purchasedVideosUse?.filter((v) => v.user_email == userEmail) || []
   const purchasedMoview = await movewVideos(userEmail, purchasedVideosUser);
 
