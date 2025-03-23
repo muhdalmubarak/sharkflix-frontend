@@ -1,5 +1,5 @@
-# Connect to Supabase via connection pooling with Supavisor.
-DATABASE_URL="postgresql://username:password@localhost:6543/database?schema=public&pgbouncer=true"
+# Connect to database via connection pooling.
+DATABASE_URL="postgresql://username:password@localhost:5432/database?schema=public&pgbouncer=true"
 # Direct connection to the database. Used for migrations.
 DIRECT_URL="postgresql://username:password@localhost:5432/database"
 
