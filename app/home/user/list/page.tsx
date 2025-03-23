@@ -98,13 +98,13 @@ export default async function Watchlist() {
 
                 <MovieCard
                   key={movie?.id}
-                  age={movie?.age as number}
-                  movieId={movie?.id as number}
+                  age={movie?.age as any}
+                  movieId={movie?.id as any}
                   overview={movie?.overview as string}
                   time={movie?.duration as number}
                   title={movie?.title as string}
                   watchList={(purchasedMoview?.length as number) > 0}
-                  year={movie?.release as number}
+                  year={movie?.release as any}
                   youtubeUrl={movie?.youtubeString as string}
                   wachtListId={""}
                   price={undefined}

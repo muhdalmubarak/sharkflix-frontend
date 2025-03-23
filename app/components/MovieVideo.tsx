@@ -77,11 +77,11 @@ export default async function MovieVideo(userEmail:any) {
   return (
     <div className="h-[55vh] lg:h-[60vh] w-full flex justify-start items-center">
       <video
-        poster={data?.imageString}
+        poster={data?.imageString as string}
         autoPlay
         muted
         loop
-        src={data?.videoSource}
+        src={data?.videoSource as string}
         className="w-full absolute top-0 left-0 h-[85vh] object-cover -z-10 brightness-[60%]"
       ></video>
 
@@ -92,11 +92,11 @@ export default async function MovieVideo(userEmail:any) {
         <p className="text-white text-lg mt-5 line-clamp-3">{data?.overview}</p>
         <div className="flex gap-x-3 mt-4">
           <MovieButtons
-            age={data?.age as number}
+            age={data?.age as any}
             duration={data?.duration as number}
-            id={data?.id as number}
+            id={data?.id as any}
             overview={data?.overview as string}
-            releaseDate={data?.release as number}
+            releaseDate={data?.release as any}
             title={data?.title as string}
             youtubeUrl={data?.youtubeString as string}
             key={data?.id}

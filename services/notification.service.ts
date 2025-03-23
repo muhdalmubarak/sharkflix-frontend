@@ -86,7 +86,7 @@ export class NotificationService {
 
   private static async getUserId(email: string): Promise<number> {
     const user = await prisma.user.findUnique({ where: { email } });
-    return user?.id || 0;
+    return user?.id ? Number(user.id) : 0;
   }
 
   // Core Notification Methods

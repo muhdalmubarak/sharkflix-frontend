@@ -264,6 +264,7 @@ model AffiliateTracking {
   affiliateUser   User?    @relation("affiliate", fields: [affiliateUserId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   user            User?    @relation("customer", fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
+  @@unique([userId, affiliateUserId])
   @@index([affiliateUserId])
   @@index([userId])
 }
