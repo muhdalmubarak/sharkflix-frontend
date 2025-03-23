@@ -34,6 +34,7 @@ fi
 > .env
 
 # Extract values manually using Bash string manipulation
+# Loop through each parameter in the JSON array
 echo "$PARAMETERS" | grep -o '{[^}]*}' | while read -r param; do
     NAME=$(echo "$param" | grep -o '"Name": *"[^"]*"' | sed -E 's/.*"Name": *"([^"]+)".*/\1/')
     VALUE=$(echo "$param" | grep -o '"Value": *"[^"]*"' | sed -E 's/.*"Value": *"([^"]+)".*/\1/')
