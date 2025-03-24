@@ -129,7 +129,7 @@ export default async function MyTicketsPage() {
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-400">Purchase Date</p>
-                                        <p>{format(new Date(ticket.purchaseDate), "MMM dd, yyyy")}</p>
+                                        <p>{ticket.purchaseDate ? format(new Date(ticket.purchaseDate), "MMM dd, yyyy") : 'N/A'}</p>
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-400">Amount Paid</p>

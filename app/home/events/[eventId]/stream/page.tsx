@@ -45,7 +45,7 @@ export default async function EventStreamPage({
     const now = new Date();
 
     // Determine stream status
-    const isLive = event.isLive && event.activeStreams > 0;
+    const isLive = event.isLive && (event.activeStreams ?? 0) > 0;
     const showWaitingRoom = !isLive && now < eventDate;
 
     return (
@@ -59,7 +59,7 @@ export default async function EventStreamPage({
                             <Badge variant={isLive ? "success" : "secondary"}>
                                 {isLive ? "Live Now" : showWaitingRoom ? "Upcoming" : "Ended"}
                             </Badge>
-                            {event.activeStreams > 0 && (
+                            {(event.activeStreams ?? 0) > 0 && (
                                 <Badge variant="outline" className="bg-purple-500/20 text-purple-500">
                                     {event.activeStreams} Active {event.activeStreams === 1 ? 'Stream' : 'Streams'}
                                 </Badge>
@@ -86,7 +86,7 @@ export default async function EventStreamPage({
                     <p className="text-gray-400">{event.description}</p>
                 </div>
 
-                {isLive && event.activeStreams > 1 && (
+                {isLive && (event.activeStreams ?? 0) > 1 && (
                     <div className="bg-black/20 rounded-lg p-6">
                         <h2 className="text-xl font-semibold mb-4">Active Co-Streamers</h2>
                         <p className="text-gray-400">

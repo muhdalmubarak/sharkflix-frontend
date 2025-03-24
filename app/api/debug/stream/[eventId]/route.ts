@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import prisma from '@/app/utils/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/utils/auth';
+import {bigint} from "zod";
 
 export async function GET(
     request: Request,
@@ -47,7 +48,7 @@ export async function GET(
         return NextResponse.json({
             event,
             userAccess: {
-                isCreator: event.userId === session.user.id,
+                isCreator: Number(event.userId) === session.user.id,
                 hasTicket: event.tickets.length > 0,
                 ticketStatus: event.tickets[0]?.status
             },

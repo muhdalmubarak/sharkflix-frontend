@@ -99,7 +99,7 @@ export async function GET(request: Request) {
     }
 
     // User must either own the event or have a valid ticket
-    const isOwner = event.userId === session.user.id;
+    const isOwner = Number(event.userId) === session.user.id;
     const hasTicket = event.tickets.length > 0;
 
     if (!isOwner && !hasTicket) {

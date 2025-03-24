@@ -62,7 +62,7 @@ export default async function CreatorEventPage({
                             <Badge variant="outline">
                                 {event.tickets.length} tickets sold
                             </Badge>
-                            {event.activeStreams > 0 && (
+                            {(event.activeStreams ?? 0) > 0 && (
                                 <Badge variant="outline" className="bg-purple-500/20 text-purple-500">
                                     {event.activeStreams} Active {event.activeStreams === 1 ? 'Stream' : 'Streams'}
                                 </Badge>

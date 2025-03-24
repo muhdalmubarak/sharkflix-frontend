@@ -48,7 +48,7 @@ export async function GET() {
     });
 
     // Calculate total views and format video data
-    const totalViews = videos.reduce((sum, video) => sum + (video.totalviews || 0), 0);
+    const totalViews = videos.reduce((sum, video) => sum + Number(video.totalviews || 0), 0);
     const totalVideos = videos.length;
 
     // Calculate revenue history (last 30 days)
@@ -85,7 +85,7 @@ export async function GET() {
       totalViews,
       totalVideos,
       revenueHistory: revenueHistory.map(entry => ({
-        date: entry.createdAt.toISOString().split('T')[0],
+        date: entry.createdAt ? entry.createdAt.toISOString().split('T')[0] : 'Unknown Date',
         amount: Number(entry._sum.amount),
       })),
       recentVideos: formattedVideos.slice(0, 8), // Last 8 videos

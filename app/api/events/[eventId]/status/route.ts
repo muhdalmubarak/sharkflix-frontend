@@ -80,7 +80,7 @@ export async function GET(
         let status = event.status;
         let isLive = event.isLive;
 
-        if (now >= eventDate && event.activeStreams > 0) {
+        if (now >= eventDate && (event.activeStreams ?? 0) > 0) {
             status = 'live';
             isLive = true;
         } else if (now < eventDate) {

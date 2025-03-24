@@ -105,42 +105,44 @@ model VerificationToken {
 }
 
 model events {
-  id                   BigInt          @id @default(autoincrement())
+  id                   BigInt             @id @default(autoincrement())
   title                String
-  date                 DateTime        @db.Timestamptz(6)
+  date                 DateTime           @db.Timestamptz(6)
   description          String?
   price                Int
   totalTickets         Int
   availableTickets     Int
   imageUrl             String?
   streamUrl            String?
-  isLive               Boolean         @default(false)
-  created_at           DateTime?       @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime?       @default(now()) @db.Timestamptz(6)
+  isLive               Boolean            @default(false)
+  created_at           DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime?          @default(now()) @db.Timestamptz(6)
   userId               BigInt
-  status               String          @default("upcoming")
-  isaffiliate          Boolean?        @default(false)
-  commissionPercentage Decimal?        @db.Decimal
-  bookingDate          DateTime        @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
+  status               String             @default("upcoming")
+  isaffiliate          Boolean?           @default(false)
+  commissionPercentage Decimal?           @db.Decimal
+  bookingDate          DateTime           @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
   trailerUrl           String?
-  agoraChannel         String?         @unique @default(uuid()) @db.Uuid
-  activeStreams        Int?            @default(0)
-  maxCoStreamers       Int?            @default(4)
-  defaultLayout        String          @default("grid") @db.VarChar(255)
+  agoraChannel         String?            @unique @default(uuid()) @db.Uuid
+  activeStreams        Int?               @default(0)
+  maxCoStreamers       Int?               @default(4)
+  defaultLayout        String             @default("grid") @db.VarChar(255)
   streamLayout         Json?
-  isMultiStream        Boolean         @default(false)
-  isTopRated           Boolean?        @default(false)
-  soldOut              Boolean?        @default(false)
+  isMultiStream        Boolean            @default(false)
+  isTopRated           Boolean?           @default(false)
+  soldOut              Boolean?           @default(false)
   recordingUrl         String?
-  allowRecordingAccess Boolean?        @default(false)
-  recordingAccessCode  String?         @unique
-  streamVia            String?         @db.VarChar(100)
-  streamId             String?         @db.VarChar(255)
-  liveStreamURLs       Json            @default("{}")
+  allowRecordingAccess Boolean?           @default(false)
+  recordingAccessCode  String?            @unique
+  streamVia            String?            @db.VarChar(100)
+  streamId             String?            @db.VarChar(255)
+  liveStreamURLs       Json               @default("{}")
   EventNote            EventNote[]
   streamSessions       StreamSession[]
-  user                 User            @relation(fields: [userId], references: [id])
+  user                 User               @relation(fields: [userId], references: [id])
   tickets              tickets[]
+  CreatorRevenue       CreatorRevenue[]
+  AffiliateRevenue     AffiliateRevenue[]
 
   @@index([status, date])
   @@index([userId, status])
@@ -250,8 +252,10 @@ model AffiliateRevenue {
   transactionId                              String
   affiliate                                  User      @relation(fields: [affiliateId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_affiliate")
   User_AffiliateRevenue_referredUserIdToUser User?     @relation("AffiliateRevenue_referredUserIdToUser", fields: [referredUserId], references: [id], onUpdate: NoAction, map: "fk_referred_user")
-  Movie                                      Movie?    @relation(fields: [movieId], references: [id])
+  movie                                      Movie?    @relation(fields: [movieId], references: [id])
+  event                                      events?   @relation(fields: [eventId], references: [id])
   movieId                                    BigInt?
+  eventId                                    BigInt?
 
   @@index([referredUserId])
   @@index([affiliateId, isPaid, createdAt], map: "idx_affiliate_revenue_affiliateid_ispaid_createdat")
@@ -289,8 +293,10 @@ model CreatorRevenue {
   creator                                  User           @relation(fields: [creatorId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   payout                                   CreatorPayout? @relation(fields: [payoutId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   User_CreatorRevenue_referredUserIdToUser User?          @relation("CreatorRevenue_referredUserIdToUser", fields: [referredUserId], references: [id], onUpdate: NoAction)
-  Movie                                    Movie?         @relation(fields: [movieId], references: [id])
+  movie                                    Movie?         @relation(fields: [movieId], references: [id])
+  event                                    events?        @relation(fields: [eventId], references: [id])
   movieId                                  BigInt?
+  eventId                                  BigInt?
 
   @@index([payoutId])
   @@index([creatorId], map: "CreatorRevenue_affiliateid_idx")
