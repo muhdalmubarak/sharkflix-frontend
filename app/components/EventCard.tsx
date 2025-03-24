@@ -9,7 +9,7 @@ import Image from "next/image";
 import { TopBadge } from "@/app/components/TopBadge";
 
 interface EventCardProps {
-    id: number;
+    id: bigint | number;
     title: string;
     description: string;
     date: Date;

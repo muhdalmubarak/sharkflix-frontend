@@ -9,7 +9,9 @@
     "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
     "fix": "npx eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "postinstall": "prisma generate",
-    "seed": "ts-node -r tsconfig-paths/register app/utils/seed.ts"
+    "seed": "ts-node -r tsconfig-paths/register app/utils/seed.ts",
+    "generate": "npx prisma migrate dev",
+    "deploy": "prisma migrate deploy"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^1.0.5",
@@ -105,10 +107,14 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/xlsx": "^0.0.36",
+    "@typescript-eslint/eslint-plugin": "^8.27.0",
+    "@typescript-eslint/parser": "^8.27.0",
     "autoprefixer": "^10.0.1",
     "eslint": "^9.23.0",
     "eslint-config-next": "14.0.1",
     "eslint-define-config": "^2.1.0",
+    "eslint-plugin-next": "^0.0.0",
+    "eslint-plugin-react": "^7.37.4",
     "globals": "^16.0.0",
     "nodemailer": "^6.9.15",
     "postcss": "^8",

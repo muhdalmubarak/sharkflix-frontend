@@ -28,27 +28,43 @@ export async function GET() {
     }
 
     // Get all revenues for this affiliate
-    const revenues = await prisma.affiliateRevenue.findMany({
+    let revenues = await prisma.affiliateRevenue.findMany({
       where: {
         affiliateId: user.id
-      },
-      include: {
-        movie: {
-          select: {
-            title: true,
-            price: true
-          }
-        },
-        event: {
-          select: {
-            title: true,
-            price: true
-          }
-        }
       },
       orderBy: {
         createdAt: 'desc'
       }
+    });
+
+    // Step 1: Extract all `sourceId`s grouped by `sourceType`
+    const movieIds = revenues.filter(r => r.sourceType === "movie").map(r => r.sourceId);
+    const eventIds = revenues.filter(r => r.sourceType === "event").map(r => r.sourceId);
+
+    // Step 2: Batch fetch movies and events
+    const [movies, events] = await Promise.all([
+      prisma.movie.findMany({
+        where: {id: {in: movieIds}},
+        select: {id: true, title: true, price: true},
+      }),
+      prisma.events.findMany({
+        where: {id: {in: eventIds}},
+        select: {id: true, title: true, price: true},
+      }),
+    ]);
+
+    // Step 3: Convert results into lookup maps
+    const movieMap = new Map(movies.map(m => [m.id, m]));
+    const eventMap = new Map(events.map(e => [e.id, e]));
+
+    // Step 4: Attach movie or event details to each record efficiently
+    revenues = revenues.map(revenue => {
+      if (revenue.sourceType === "movie") {
+        return {...revenue, movie: movieMap.get(revenue.sourceId) || null};
+      } else if (revenue.sourceType === "event") {
+        return {...revenue, event: eventMap.get(revenue.sourceId) || null};
+      }
+      return revenue;
     });
 
     // Calculate summary statistics
@@ -72,9 +88,10 @@ export async function GET() {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const recentTransactions = revenues.filter(rev =>
-      new Date(rev.createdAt) > thirtyDaysAgo
-    );
+    const recentTransactions = revenues.filter(rev => {
+      if (!rev.createdAt) return false; // If rev.createdAt is null or undefined, skip this entry
+      return new Date(rev.createdAt) > thirtyDaysAgo;
+    });
 
     // Format the response
     const response = {
@@ -170,7 +187,8 @@ export async function POST(request: Request) {
 
     // Group by affiliateId and sum amounts
     const affiliateBalances = revenues.reduce((acc, rev) => {
-      acc[rev.affiliateId] = (acc[rev.affiliateId] || 0) + Number(rev.amount);
+      const affiliateId = Number(rev.affiliateId); // Ensure affiliateId is treated as a number
+      acc[affiliateId] = (acc[affiliateId] || 0) + Number(rev.amount);
       return acc;
     }, {} as Record<number, number>);
 

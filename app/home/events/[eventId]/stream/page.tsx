@@ -74,8 +74,8 @@ export default async function EventStreamPage({
                     isLive={isLive}
                     showWaitingRoom={showWaitingRoom}
                     eventDate={eventDate}
-                    description={event.description}
-                    agoraChannel={event.agoraChannel}
+                    description={event.description as string}
+                    agoraChannel={event.agoraChannel as string}
                     eventId={params.eventId}
                     event={event}
                 />

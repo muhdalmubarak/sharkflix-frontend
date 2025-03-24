@@ -8,7 +8,7 @@ import { User } from "@prisma/client";
 export async function validateAffiliateCode(affiliateCode: string | null): Promise<{
   valid: boolean;
   affiliateUser?: {
-    id: number;
+    id: bigint;
     email: string | null;
     role: string | null;
     affiliateCode: string | null;

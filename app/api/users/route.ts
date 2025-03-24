@@ -9,7 +9,7 @@ type CreateUserRequest = {
   email: string;
   password: string;
   role: string;
-  user_otp: number;
+  user_otp: string;
   affiliateCode?: string | null;
   referredBy?: string | null;
 }
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
     }
 
     // Validate the affiliate code if provided
-    let validatedAffiliateId: number | null = null;
+    let validatedAffiliateId: bigint | null = null;
     if (referredBy) {
       logger.log(`Validating affiliate code: ${referredBy.substring(0, 8)}...`);
       try {

@@ -76,7 +76,7 @@ export const authOptions = {
           select: { role: true, affiliateCode : true, id: true }, // Fetch only the role
         });
         if (dbUser?.id) {
-          session.user.id = dbUser.id; // id role to session
+          session.user.id = Number(dbUser.id); // id role to session
 
         }
         if (dbUser?.role) {

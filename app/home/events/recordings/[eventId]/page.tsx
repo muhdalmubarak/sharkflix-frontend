@@ -5,7 +5,7 @@ import prisma from "@/app/utils/db";
 import { notFound, redirect } from "next/navigation";
 import { RecordingPlayer } from "@/app/components/RecordingPlayer";
 
-async function getEventRecording(eventId: string, userId: number | undefined) {
+async function getEventRecording(eventId: string, userId: bigint | number | undefined) {
   try {
     const event = await prisma.events.findUnique({
       where: {

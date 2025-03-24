@@ -26,7 +26,7 @@ interface EventPreviewModalProps {
     soldOut: boolean;
     availableTickets: number;
     isBookingOpen: boolean;
-    eventId: number;  // Add this
+    eventId: bigint | number;  // Add this
     hasTicket: boolean;  // Add this
     userEmail?: string | null;  // Add this
     showActions?: boolean; // Add this prop

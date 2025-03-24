@@ -7,7 +7,7 @@ import {PayHalalService} from '@/services/payhalal.service';
 import {useToast} from "@/hooks/use-toast";
 
 interface BookTicketButtonProps {
-    eventId: number;
+    eventId: bigint | number;
     hasTicket: boolean;
     isAvailable: boolean;
     isBookingOpen: boolean;  // Add this prop
@@ -91,6 +91,8 @@ export function BookTicketButton({
             router.push('/home/events/my-tickets');
             return;
         }
+
+        eventId = Number(eventId);
 
         try {
             window.location.href = await PayHalalService.initiateTicketPayment({

@@ -5,7 +5,7 @@ import { Button } from "@/components/shadcn-ui/button";
 import { EventCard } from "@/app/components/EventCard";
 
 interface Event {
-  id: number;
+  id: bigint | number;
   title: string;
   description: string;
   date: Date;

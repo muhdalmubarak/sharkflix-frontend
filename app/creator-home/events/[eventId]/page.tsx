@@ -78,7 +78,7 @@ export default async function CreatorEventPage({
                 {canStream ? (
                     <div className="space-y-4">
                         <CloudflareWebStream
-                            channelName={event.agoraChannel}
+                            channelName={event.agoraChannel as string}
                             eventId={event.id.toString()}
                             event={event}
                             isHost={true}

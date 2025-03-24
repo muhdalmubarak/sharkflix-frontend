@@ -77,7 +77,7 @@ export default async function EventsPage() {
                                 <EventCard
                                     id={event.id}
                                     title={event.title}
-                                    description={event.description}
+                                    description={event.description as string}
                                     date={event.date}
                                     bookingDate={event.bookingDate}
                                     price={event.price}
@@ -88,8 +88,8 @@ export default async function EventsPage() {
                                     trailerUrl={event.trailerUrl as string}
                                     currentUser={currentUser}
                                     showActions
-                                    isTopRated={event.isTopRated}
-                                    soldOut={event.soldOut}
+                                    isTopRated={event.isTopRated as boolean}
+                                    soldOut={event.soldOut as boolean}
                                 />
                             </div>
                         </div>

@@ -6,7 +6,7 @@ import { authOptions } from "../utils/auth";
 import prisma from "../utils/db";
 
 
-async function getUpcomingEvents(userId: number) {
+async function getUpcomingEvents(userId: number): Promise<any> {
   const events = await prisma.events.findMany({
     where: {
       status: {
