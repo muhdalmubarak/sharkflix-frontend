@@ -102,7 +102,7 @@ export const authOptions = {
       return token;
     },
   },
-  secret: 'https://sharkflix-repo.vercel.app',
+  secret: process.env.NEXT_PUBLIC_URL,
   pages: {
     signIn: "/",
   },

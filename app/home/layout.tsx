@@ -21,7 +21,7 @@ export default async function HomeLayout({
     try {
       // Send data to the server-side API route to create the user
       const response = await fetch(
-        "https://sharkflix-repo.vercel.app/api/user-login",
+          process.env.NEXT_PUBLIC_URL+"/api/user-login",
         {
           method: "POST",
           headers: {

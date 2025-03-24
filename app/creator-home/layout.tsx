@@ -19,7 +19,7 @@ export default async function HomeLayout({
    try {
       // Send data to the server-side API route to create the user
       const response = await fetch(
-        "https://sharkflix-repo.vercel.app/api/user-login",
+        process.env.NEXT_PUBLIC_URL+"/api/user-login",
         {
           method: "POST",
           headers: {
@@ -40,7 +40,6 @@ export default async function HomeLayout({
         const data = await response.json();
         userData = data
 
-          console.log("data?.user?.name ->", data?.user);
         // Check registration status and redirect if needed
         if (data?.user?.name === null) {
           switch (data?.user?.role) {
@@ -62,7 +61,7 @@ export default async function HomeLayout({
   } catch (error) {
       console.error("Error fetching user data:", error);
   }
- 
+
   return (
     <>
       <Navbar session={session} userData={userData} />

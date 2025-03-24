@@ -31,6 +31,7 @@ export async function POST(req: Request) {
   try {
     // Log raw request for debugging, being careful with PII
     const rawBody = await req.text();
+
     try {
       // Try to parse and redact before logging
       const parsedBody = JSON.parse(rawBody);
@@ -101,7 +102,7 @@ export async function POST(req: Request) {
         email,
         password: hashedPassword, // Store hashed password
         role,
-        user_otp,
+        user_otp: String(user_otp),
         affiliateCode,
       },
     });
