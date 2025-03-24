@@ -42,7 +42,7 @@ export async function GET() {
                 const metadata = notification.metadata as NotificationMetadata;
 
                 await NotificationService.sendBookingReminder({
-                    userEmail: notification.user.email as string,
+                    userEmail: notification?.user?.email as string,
                     eventTitle: metadata.eventTitle,
                     bookingDate: new Date(metadata.bookingDate),
                     hoursUntilBooking: 1

@@ -50,7 +50,7 @@ export default async function MyTicketsPage() {
 
           <div className="grid grid-cols-1 gap-6">
               {tickets.map((ticket) => {
-                  const eventDate = new Date(ticket.event.date);
+                  const eventDate = new Date(ticket?.event?.date || 0);
                   const now = new Date();
 
                   // Calculate the end of the event day (11:59:59 PM)
@@ -59,10 +59,10 @@ export default async function MyTicketsPage() {
 
                   const isPastEvent = now > eventEndDate;
                   const canWatchStream = ticket.status === 'active' && !isPastEvent;
-                  const isBookingOpen = now >= new Date(ticket.event.bookingDate);
+                  const isBookingOpen = now >= new Date(ticket?.event?.bookingDate || 0);
 
                   // Check if recording is available
-                  const hasRecording = !!ticket.event.recordingUrl && ticket.event.allowRecordingAccess;
+                  const hasRecording = !!ticket?.event?.recordingUrl && ticket.event.allowRecordingAccess;
 
                   return (
                     <div
@@ -72,7 +72,7 @@ export default async function MyTicketsPage() {
                         <div className="p-6 flex flex-col md:flex-row gap-6">
                             {/* Event Image */}
                             <div className="relative w-full md:w-48 h-32">
-                                {ticket.event.imageUrl && (
+                                {ticket?.event?.imageUrl && (
                                   <Image
                                     src={ticket.event.imageUrl}
                                     alt={ticket.event.title}
@@ -87,12 +87,12 @@ export default async function MyTicketsPage() {
                                 <div>
                                     <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
                                         {canWatchStream && isBookingOpen ? (
-                                          <Link href={`/home/events/${ticket.event.id}/stream`} className="hover:text-blue-500 transition-colors flex items-center gap-2">
-                                              {ticket.event.title}
+                                          <Link href={`/home/events/${ticket?.event?.id}/stream`} className="hover:text-blue-500 transition-colors flex items-center gap-2">
+                                              {ticket?.event?.title}
                                               <ArrowUpRight className="w-4 h-4" />
                                           </Link>
                                         ) : (
-                                          ticket.event.title
+                                          ticket?.event?.title
                                         )}
                                         {canWatchStream && isBookingOpen && (
                                           <Badge className="ml-2" variant="outline">
@@ -116,8 +116,8 @@ export default async function MyTicketsPage() {
                                     <div className="flex flex-col gap-1 text-sm text-gray-400">
                                         <p>Event Date: {format(eventDate, "MMMM dd, yyyy - hh:mm a")}</p>
                                         {!isBookingOpen && (
-                                          <p>Booking Opens: {format(new Date(ticket.event.bookingDate), "MMMM dd, yyyy - hh:mm a")}</p>
-                                        )}
+                                            <p>Booking Opens: {format(new Date(ticket?.event?.bookingDate ?? 0), "MMMM dd, yyyy - hh:mm a")}</p>
+                                    )}
                                     </div>
                                 </div>
 
@@ -146,7 +146,7 @@ export default async function MyTicketsPage() {
                                 {/* Actions */}
                                 <div className="flex flex-wrap gap-3 mt-4">
                                     {canWatchStream && isBookingOpen && (
-                                      <Link href={`/home/events/${ticket.event.id}/stream`}>
+                                      <Link href={`/home/events/${ticket?.event?.id}/stream`}>
                                           <Button variant="default" className="flex items-center gap-2">
                                               Watch Stream
                                               <ArrowRight className="w-4 h-4"/>
@@ -154,7 +154,7 @@ export default async function MyTicketsPage() {
                                       </Link>
                                     )}
                                     {hasRecording && isPastEvent && (
-                                      <Link href={`/home/events/recordings/${ticket.event.id}`}>
+                                      <Link href={`/home/events/recordings/${ticket?.event?.id}`}>
                                           <Button variant="outline" className="flex items-center gap-2">
                                               <Video className="w-4 h-4" />
                                               Watch Recording

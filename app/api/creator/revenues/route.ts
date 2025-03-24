@@ -3,6 +3,24 @@ import {NextResponse} from "next/server";
 import {getServerSession} from "next-auth";
 import {authOptions} from "@/app/utils/auth";
 import prisma from "@/app/utils/db";
+import {Decimal} from "@prisma/client/runtime/binary";
+import {events, Movie} from "@prisma/client";
+
+interface Transaction {
+    id: bigint;
+    createdAt: Date | null;
+    creatorId: bigint;
+    amount: Decimal;
+    sourceType: string;
+    sourceId: bigint;
+    isPaid: boolean | null;
+    paidAt: Date | null;
+    updatedAt: Date | null;
+    referredUserId: bigint | null;
+    transactionId: string;
+    movie?: Movie;
+    event?: events;
+}
 
 export async function GET() {
     try {
@@ -88,7 +106,7 @@ export async function GET() {
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
         const recentTransactions = revenues.filter(
-            (rev) => new Date(rev.createdAt) > thirtyDaysAgo
+            (rev) => rev.createdAt && new Date(rev.createdAt) > thirtyDaysAgo
         );
 
         // Format the response
@@ -102,7 +120,7 @@ export async function GET() {
                     event: eventRevenue,
                 },
             },
-            recentTransactions: recentTransactions.map((rev) => ({
+            recentTransactions: recentTransactions.map((rev: Transaction) => ({
                 id: rev.id,
                 amount: rev.amount,
                 sourceType: rev.sourceType,
@@ -112,7 +130,7 @@ export async function GET() {
                 paidAt: rev.paidAt,
                 transactionId: rev.transactionId,
             })),
-            allRevenues: revenues.map((rev) => ({
+            allRevenues: revenues.map((rev: Transaction) => ({
                 id: rev.id,
                 amount: rev.amount,
                 sourceType: rev.sourceType,
