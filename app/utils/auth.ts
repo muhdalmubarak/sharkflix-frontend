@@ -54,9 +54,9 @@ export const authOptions = {
     
         // For example, you could check the email/password against a database:
         const user = await authenticateUser(email, password);
-    
+
+        console.log(user)
         if (user) {
-          console.log('hiii')
           return user; // Authentication successful, return user object
         } else {
           return null; // Authentication failed

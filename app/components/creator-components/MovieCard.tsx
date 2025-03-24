@@ -175,7 +175,7 @@ export function MovieCard({
               </div>
               {price > 0 && (
                 <div className="text-[#e50914] font-bold text-sm">
-                  {price.toFixed(2)} MYR
+                  {Number(price).toFixed(2)} MYR
                 </div>
               )}
             </div>
