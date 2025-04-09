@@ -1,6 +1,6 @@
 // services/payhalal.service.ts
 
-import { generatePayHalalPaymentHash } from '@/app/utils/hash';
+import {generatePayHalalPaymentHash} from '@/app/utils/hash';
 
 interface PayHalalConfig {
     testingMode: boolean;
@@ -37,7 +37,7 @@ interface PaymentDetails {
 export class PayHalalService {
     private static config: PayHalalConfig = {
         /**************** TESTING OR LIVE MODE set here!!! ***********************/
-        testingMode: false, // Default to testing mode !!!!!!
+        testingMode: (process.env.NEXT_PUBLIC_PAYMENT_API_TESTMODE?.toLowerCase() === "true"), // Default to testing mode !!!!!!
         appId: {
             testing: "app-testing-b0e9b5f922eb212825d0da91713657dd",
             live: "app-live-cce0532c77b7eacd5d96c8d26d957199",
@@ -53,8 +53,8 @@ export class PayHalalService {
             alternativeTesting: "secret-testing-3bc80cba1708865d6e313271ce7cec75"
         },
         webhookEndpoints: {
-            default: "/api/charge-webhook",
-            testing: "/api/charge-webhook-test"
+            default: process.env.NEXT_PUBLIC_URL + "/api/charge-webhook",
+            testing: process.env.NEXT_PUBLIC_URL + "/api/charge-webhook-test"
         }
     };
 
@@ -82,8 +82,8 @@ export class PayHalalService {
         }
 
         return this.config.testingMode
-          ? this.config.appId.testing
-          : this.config.appId.live;
+            ? this.config.appId.testing
+            : this.config.appId.live;
     }
 
     static getEndpoint(useAlternative: boolean = false): string {
@@ -92,8 +92,18 @@ export class PayHalalService {
         }
 
         return this.config.testingMode
-          ? this.config.endpoints.testing
-          : this.config.endpoints.live;
+            ? this.config.endpoints.testing
+            : this.config.endpoints.live;
+    }
+
+    static getWebhookUrl(useAlternative: boolean = false): string {
+        if (useAlternative) {
+            return this.config.webhookEndpoints.testing;
+        }
+
+        return this.config.testingMode
+            ? this.config.webhookEndpoints.testing
+            : this.config.webhookEndpoints.default;
     }
 
     private static async createPaymentUrl(details: PaymentDetails): Promise<string> {
@@ -108,21 +118,21 @@ export class PayHalalService {
         } = details;
 
         const app_id = useTestEndpoint
-          ? this.config.appId.alternativeTesting
-          : this.getAppId();
+            ? this.config.appId.alternativeTesting
+            : this.getAppId();
 
         const endpoint = useTestEndpoint
-          ? this.config.endpoints.testing
-          : this.getEndpoint();
+            ? this.config.endpoints.testing
+            : this.getEndpoint();
 
         // Select appropriate secret for hash generation
         const secret = useTestEndpoint
-          ? this.config.secrets.alternativeTesting
-          : this.getSecret();
+            ? this.config.secrets.alternativeTesting
+            : this.getSecret();
 
         // Generate hash
         const hash = await generatePayHalalPaymentHash({
-            amount: amount.toFixed(2),
+            amount: Number(amount).toFixed(2),
             currency: "MYR",
             product_description,
             order_id,
@@ -136,14 +146,14 @@ export class PayHalalService {
         const params = {
             app_id,
             currency: "MYR",
-            amount: amount.toFixed(2),
+            amount: Number(amount).toFixed(2),
             product_description,
             order_id,
             hash,
             customer_email: userEmail,
             customer_name,
             customer_phone,
-            language: 'en',
+            language: 'en'
         };
 
         // Add all parameters to URL
@@ -155,12 +165,12 @@ export class PayHalalService {
     }
 
     static async initiateTicketPayment({
-       userEmail,
-       eventId,
-       title,
-       price,
-       useTestEndpoint = false
-    }: {
+                                           userEmail,
+                                           eventId,
+                                           title,
+                                           price,
+                                           useTestEndpoint = false
+                                       }: {
         userEmail: string;
         eventId: number;
         title: string;
@@ -190,11 +200,11 @@ export class PayHalalService {
     }
 
     static async initiateTestTicketPayment({
-        userEmail,
-        eventId,
-        title,
-        price
-    }: {
+                                               userEmail,
+                                               eventId,
+                                               title,
+                                               price
+                                           }: {
         userEmail: string;
         eventId: number;
         title: string;
@@ -210,10 +220,10 @@ export class PayHalalService {
     }
 
     static async initiateVideoPayment({
-        userEmail,
-        youtubeUrl,
-        price
-    }: {
+                                          userEmail,
+                                          youtubeUrl,
+                                          price
+                                      }: {
         userEmail: string;
         youtubeUrl: string;
         price: number;

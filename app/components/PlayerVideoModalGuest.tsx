@@ -41,8 +41,8 @@ async function payment(youtubeUrl:any,userEmail:any,price:any){
       },
     ],
     mode: 'payment',
-    success_url: 'https://www.sharkv.my/home/recently',
-    cancel_url: 'https://www.sharkv.my/home/recently',
+    success_url: process.env.NEXT_PUBLIC_URL + '/home/recently',
+    cancel_url: process.env.NEXT_PUBLIC_URL + '/home/recently',
     metadata: {
       userEmail: userEmail, // Store the user ID
       order_id: youtubeUrl, // Store the order ID

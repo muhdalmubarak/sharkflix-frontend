@@ -51,8 +51,6 @@ export default function PlayVideoModal({
 }: iAppProps) {
   const [openPaymentPage, setOpenPaymentPage] = useState(false);
   const [paymentURL, setPaymentURL] = useState("");
-  console.log("purchasedVideos===", purchasedVideos);
-
   const playerRef = useRef<ReactPlayer | null>(null);
 
   const handleProgress = (state: { playedSeconds: number }) => {
@@ -81,7 +79,7 @@ export default function PlayVideoModal({
 
   const handleCopyLink = () => {
     navigator.clipboard
-      .writeText(`www.sharkv.live/guest-user?movie=` + getFileName(youtubeUrl))
+      .writeText(`${process.env.NEXT_PUBLIC_MAIN_DOMAIN_URL}/guest-user?movie=` + getFileName(youtubeUrl))
       .then(() => setCopied(true))
       .catch((err) => console.error("Failed to copy link: ", err));
 
