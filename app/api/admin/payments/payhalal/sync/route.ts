@@ -23,6 +23,7 @@ export async function POST(request: Request) {
                 const transactions = await transactionsResponse.json();
 
                 let totalTransactionsSynced = 0;
+                const totalTransactionsMissing = transactions.length;
                 const missingTransactions: any = [];
                 await Promise.all(
                     transactions.map(async (transaction: any) => {
@@ -87,7 +88,7 @@ export async function POST(request: Request) {
                     })
                 );
 
-                const responseMessage = !totalTransactionsSynced ? 'Everything is up to date' : `${totalTransactionsSynced} records synced.`;
+                const responseMessage = !totalTransactionsSynced ? 'Everything is up to date' : `${totalTransactionsSynced}/${totalTransactionsMissing} records synced.`;
 
                 return NextResponse.json({'success': true, 'message': responseMessage});
             }
