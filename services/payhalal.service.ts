@@ -245,7 +245,7 @@ export class PayHalalService {
         endDate: string;
     }) {
 
-        const response = await fetch(`/api/admin/payments/payhalal/transactions`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/admin/payments/payhalal/transactions`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

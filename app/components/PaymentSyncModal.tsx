@@ -2,7 +2,6 @@ import {Button} from "@/components/shadcn-ui/button";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,} from "@/components/ui/dialog";
 import * as React from "react";
 import {useEffect, useState} from "react";
-import {PayHalalService} from '@/services/payhalal.service';
 import {Info, Loader} from "lucide-react";
 import {CalendarDateRangePicker} from "@/components/creator-dashboard/components/date-range-picker";
 import {DateRange} from "react-day-picker";
@@ -47,36 +46,28 @@ export default function PaymentSyncModal({
         e.preventDefault();
         setLoading(true);
         try {
-            const transactionsResponse = await PayHalalService.initiateBatchTransactionsSync({
-                startDate,
-                endDate
+            const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/admin/payments/payhalal/sync`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({startDate, endDate}),
             });
 
-            if (transactionsResponse.ok) {
-                const transactions = await transactionsResponse.json();
-                const response = await fetch(`/api/admin/payments/payhalal/sync`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({transactions}),
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error);
+            }
+
+            const syncedTransactionsResponse = await response.json();
+
+            if (syncedTransactionsResponse.success && syncedTransactionsResponse.message) {
+                changeState(false);
+                operationStatus(syncedTransactionsResponse);
+                toast({
+                    title: "Success",
+                    description: syncedTransactionsResponse.message
                 });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error);
-                }
-
-                const syncedTransactionsResponse = await response.json();
-
-                if (syncedTransactionsResponse.success && syncedTransactionsResponse.message) {
-                    changeState(false);
-                    operationStatus(syncedTransactionsResponse);
-                    toast({
-                        title: "Success",
-                        description: syncedTransactionsResponse.message
-                    });
-                }
             }
         } catch (error: any) {
             setSyncResponse(error.message);
