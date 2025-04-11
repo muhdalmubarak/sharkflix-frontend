@@ -3,7 +3,7 @@ import {NextResponse} from "next/server";
 import {OptimizedPaymentService} from "@/services/optimized-payment.service";
 import EmailQueueService from "@/services/emailQueue.service";
 
-export const maxDuration = 300; // This function can run for a maximum of 300 seconds
+export const maxDuration = 1800; // This function can run for a maximum of 300 seconds
 // Enable edge runtime for better performance
 // export const runtime = 'edge' // 'nodejs' (default) | 'edge'
 

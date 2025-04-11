@@ -3,10 +3,17 @@ import {NextResponse} from 'next/server';
 import prisma from "@/app/utils/db";
 import {generatePayHalalCallbackHash} from "@/app/utils/hash";
 import {PayHalalService} from "@/services/payhalal.service";
+import {getServerSession} from "next-auth";
+import {authOptions} from "@/app/utils/auth";
 
 // POST /api/admin/payments/payhalal/sync - Create new event
 export async function POST(request: Request) {
     try {
+
+        const session = await getServerSession(authOptions); // Add authOptions here
+        if (session?.user?.role !== "admin") {
+            return new NextResponse('Unauthorized', {status: 401});
+        }
 
         const merchantId = process.env.PAYHALAL_MERCHANT_ID;
 
@@ -25,6 +32,8 @@ export async function POST(request: Request) {
                 let totalTransactionsSynced = 0;
                 const totalTransactionsMissing = transactions.length;
                 const missingTransactions: any = [];
+                const paymentTestMode = (process.env.NEXT_PUBLIC_PAYMENT_API_TESTMODE?.toLowerCase() === "true");
+
                 await Promise.all(
                     transactions.map(async (transaction: any) => {
                         if (transaction.transaction_id) {
@@ -32,7 +41,7 @@ export async function POST(request: Request) {
                                 where: {transactionId: transaction.transaction_id},
                             });
                             if (!dbTransaction) {
-                                const secret = PayHalalService.getSecret(true);
+                                const secret = paymentTestMode ? PayHalalService.getSecret(true) : PayHalalService.getSecret();
                                 const expectedHash = generatePayHalalCallbackHash({
                                     amount: transaction?.amount,
                                     currency: transaction?.currency,
@@ -64,7 +73,7 @@ export async function POST(request: Request) {
                     })
                 );
 
-                const endPoint = (process.env.NEXT_PUBLIC_PAYMENT_API_TESTMODE?.toLowerCase() === "true") ? `${process.env.NEXT_PUBLIC_URL}/api/charge-webhook-test` : `${process.env.NEXT_PUBLIC_URL}/api/charge-webhook`;
+                const endPoint = paymentTestMode ? `${process.env.NEXT_PUBLIC_URL}/api/charge-webhook-test` : `${process.env.NEXT_PUBLIC_URL}/api/charge-webhook`;
 
                 await Promise.all(
                     missingTransactions.map(async (transaction: any) => {
