@@ -1,6 +1,7 @@
 // services/payhalal.service.ts
 
 import {generatePayHalalPaymentHash} from '@/app/utils/hash';
+import {NextResponse} from "next/server";
 
 interface PayHalalConfig {
     testingMode: boolean;
@@ -235,4 +236,36 @@ export class PayHalalService {
             order_id: youtubeUrl
         });
     }
+
+    static async initiateBatchTransactionsSync({
+                                                   startDate,
+                                                   endDate
+                                               }: {
+        startDate: string;
+        endDate: string;
+    }) {
+
+        const response = await fetch(`/api/admin/payments/payhalal/transactions`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({startDate, endDate}),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Something went wrong');
+        }
+
+        const transactionsData = await response.json();
+
+        if (transactionsData.Result) {
+            throw new Error(transactionsData.Result);
+        }
+
+        return NextResponse.json(transactionsData);
+
+    }
+
 }

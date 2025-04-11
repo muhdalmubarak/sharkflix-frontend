@@ -1,129 +1,148 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import AdminEventsTable from '@/app/components/admin-components/AdminEventsTable';
-import { Alert, AlertDescription, AlertTitle } from '@/components/shadcn-ui/alert';
-import { Button } from '@/components/ui/button';
+import {Alert, AlertDescription, AlertTitle} from '@/components/shadcn-ui/alert';
+import {Button} from '@/components/ui/button';
+import PaymentSyncModal from "@/app/components/PaymentSyncModal";
 
 export default function AdminEventsPage() {
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [events, setEvents] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [syncModalStateOpen, setSyncModalStateOpen] = useState(false);
+    const [syncModalOperationStatus, setSyncModalOperationStatus] = useState({success: false});
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
+    useEffect(() => {
+        fetchEvents();
+    }, []);
 
-  const fetchEvents = async () => {
-    try {
-      const response = await fetch('/api/admin/events');
-      const data = await response.json();
+    useEffect(() => {
+        if (syncModalOperationStatus.success) fetchEvents();
+    }, [syncModalOperationStatus]);
 
-      if (!response.ok) throw new Error(data.message || 'Failed to fetch events');
+    const fetchEvents = async () => {
+        try {
+            const response = await fetch('/api/admin/events');
+            const data = await response.json();
 
-      setEvents(data);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
+            if (!response.ok) throw new Error(data.message || 'Failed to fetch events');
 
-  const handleStatusChange = async (eventId: number, newStatus: string) => {
-    try {
-      const response = await fetch(`/api/admin/events/${eventId}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
+            setEvents(data);
+            setError(null);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'An error occurred');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-      if (!response.ok) throw new Error('Failed to update status');
+    const handleStatusChange = async (eventId: number, newStatus: string) => {
+        try {
+            const response = await fetch(`/api/admin/events/${eventId}/status`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({status: newStatus}),
+            });
 
-      setSuccessMessage('Event status updated successfully');
-      await fetchEvents();
+            if (!response.ok) throw new Error('Failed to update status');
 
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update status');
-    }
-  };
+            setSuccessMessage('Event status updated successfully');
+            await fetchEvents();
 
-  const handleDelete = async (eventId: number) => {
-    try {
-      const response = await fetch(`/api/admin/events/${eventId}`, {
-        method: 'DELETE',
-      });
+            // Clear success message after 3 seconds
+            setTimeout(() => setSuccessMessage(null), 3000);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to update status');
+        }
+    };
 
-      if (!response.ok) throw new Error('Failed to delete event');
+    const handleDelete = async (eventId: number) => {
+        try {
+            const response = await fetch(`/api/admin/events/${eventId}`, {
+                method: 'DELETE',
+            });
 
-      setSuccessMessage('Event deleted successfully');
-      await fetchEvents();
+            if (!response.ok) throw new Error('Failed to delete event');
 
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete event');
-    }
-  };
+            setSuccessMessage('Event deleted successfully');
+            await fetchEvents();
 
-  return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Event Management</h1>
-        {/*<Button*/}
-        {/*  onClick={() => /!* Add navigation to create event page *!/}*/}
-        {/*  className="bg-blue-600 hover:bg-blue-700 text-white"*/}
-        {/*>*/}
-        {/*  Create New Event*/}
-        {/*</Button>*/}
-      </div>
+            // Clear success message after 3 seconds
+            setTimeout(() => setSuccessMessage(null), 3000);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to delete event');
+        }
+    };
 
-      {/* Error Alert */}
-      {error && (
-        <Alert variant="destructive">
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+    return (
+        <div className="p-6 max-w-7xl mx-auto space-y-6">
+            <div className="flex justify-between items-center">
+                <h1 className="text-2xl font-bold">Event Management</h1>
+                <Button
+                    onClick={() => {
+                        setSyncModalStateOpen(true)
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                    Sync Payments & Tickets
+                </Button>
+                {syncModalStateOpen &&
+                    <PaymentSyncModal
+                        state={syncModalStateOpen}
+                        changeState={setSyncModalStateOpen}
+                        operationStatus={setSyncModalOperationStatus}
+                        title={'Sync Payments & Tickets'}
+                        overview={'Select a date range to sync all the payments and tickets from Payhalal.'}
+                    />
+                }
+            </div>
 
-      {/* Success Message */}
-      {successMessage && (
-        <Alert className="bg-green-50 text-green-800 border-green-200">
-          <AlertTitle>Success</AlertTitle>
-          <AlertDescription>{successMessage}</AlertDescription>
-        </Alert>
-      )}
+            {/* Error Alert */}
+            {error && (
+                <Alert variant="destructive">
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                </Alert>
+            )}
 
-      {/* Loading State */}
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+            {/* Success Message */}
+            {successMessage && (
+                <Alert className="bg-green-50 text-green-800 border-green-200">
+                    <AlertTitle>Success</AlertTitle>
+                    <AlertDescription>{successMessage}</AlertDescription>
+                </Alert>
+            )}
+
+            {/* Loading State */}
+            {loading ? (
+                <div className="flex justify-center items-center h-64">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+                </div>
+            ) : events.length === 0 ? (
+                // Empty State
+                <div className="text-center py-12 bg-white rounded-lg shadow">
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Events Found</h3>
+                    <p className="text-gray-500 mb-4">Get started by creating your first event.</p>
+                    <Button
+                        onClick={() => {/* Add navigation to create event page */
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                        Create New Event
+                    </Button>
+                </div>
+            ) : (
+                // Events Table
+                <AdminEventsTable
+                    events={events}
+                    onStatusChange={handleStatusChange}
+                    onDelete={handleDelete}
+                />
+            )}
         </div>
-      ) : events.length === 0 ? (
-        // Empty State
-        <div className="text-center py-12 bg-white rounded-lg shadow">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No Events Found</h3>
-          <p className="text-gray-500 mb-4">Get started by creating your first event.</p>
-          <Button
-            onClick={() => {/* Add navigation to create event page */}}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            Create New Event
-          </Button>
-        </div>
-      ) : (
-        // Events Table
-        <AdminEventsTable
-          events={events}
-          onStatusChange={handleStatusChange}
-          onDelete={handleDelete}
-        />
-      )}
-    </div>
-  );
+    );
 }

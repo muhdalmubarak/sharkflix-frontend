@@ -1,7 +1,7 @@
 // app/utils/hash.ts
 
-import { createHash } from "crypto";
-import { PayHalalService } from "@/services/payhalal.service";
+import {createHash} from "crypto";
+import {PayHalalService} from "@/services/payhalal.service";
 
 interface PayHalalHashParams {
     amount: string;
@@ -36,8 +36,17 @@ export async function generatePayHalalPaymentHash(params: Omit<PayHalalHashParam
         params.customer_phone
     ].join('');
 
-    console.log('Payment Hash Input:', concatenatedString);
     return createHash("sha256").update(concatenatedString, "utf8").digest("hex");
+}
+
+export async function generateReconcileHash(merchantId: string, customSecret?: string): Promise<string> {
+    // Use provided custom secret or get from service
+    const app_id = PayHalalService.getAppId();
+    const app_secret = customSecret || PayHalalService.getSecret();
+
+    const concatenatedString = [merchantId, app_id, app_secret].join('');
+
+    return createHash("md5").update(concatenatedString, "utf8").digest("hex");
 }
 
 /**
@@ -46,7 +55,7 @@ export async function generatePayHalalPaymentHash(params: Omit<PayHalalHashParam
  * @param customSecret Optional custom secret to use instead of the default
  * @returns Generated hash
  */
-export function generatePayHalalCallbackHash(params: PayHalalHashParams,  customSecret?: string): string {
+export function generatePayHalalCallbackHash(params: PayHalalHashParams, customSecret?: string): string {
     const app_secret = customSecret || PayHalalService.getSecret();
 
     const concatenatedString = [
@@ -62,6 +71,5 @@ export function generatePayHalalCallbackHash(params: PayHalalHashParams,  custom
         params.status
     ].join('');
 
-    console.log('Callback Hash Input:', concatenatedString);
     return createHash("sha256").update(concatenatedString, "utf8").digest("hex");
 }

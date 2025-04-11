@@ -1,9 +1,9 @@
 // app/api/charge-webhook/route.ts
-import { NextResponse } from "next/server";
-import { OptimizedPaymentService } from "@/services/optimized-payment.service";
+import {NextResponse} from "next/server";
+import {OptimizedPaymentService} from "@/services/optimized-payment.service";
 import EmailQueueService from "@/services/emailQueue.service";
 
-export const maxDuration = 300; // This function can run for a maximum of 300 seconds
+export const maxDuration = 1800; // This function can run for a maximum of 300 seconds
 
 // Request coalescing cache
 const webhookCache = new Map<string, Promise<any>>();
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
         const transactionId = formData.get('transaction_id')?.toString();
 
         if (!transactionId) {
-            return new Response('Missing transaction ID', { status: 400 });
+            return new Response('Missing transaction ID', {status: 400});
         }
 
         // Check cache for existing processing
@@ -57,7 +57,7 @@ async function queueNotifications(formData: FormData, data: any) {
     const customerEmail = formData.get('customer_email')?.toString() || '';
 
     if ('ticket' in data) {
-        const { ticket, payment, event } = data;
+        const {ticket, payment, event} = data;
         if (ticket && payment && event) {
             await EmailQueueService.addToQueue('ticket_purchase', {
                 userId: ticket.userId,
@@ -73,7 +73,7 @@ async function queueNotifications(formData: FormData, data: any) {
             });
         }
     } else if ('purchase' in data) {
-        const { purchase } = data;
+        const {purchase} = data;
         if (purchase) {
             await EmailQueueService.addToQueue('video_purchase', {
                 userEmail: customerEmail,
@@ -99,7 +99,7 @@ function handleWebhookError(error: Error) {
     if (knownErrors.has(error.message)) {
         return new Response(error.message, {
             status: 400,
-            headers: { 'Content-Type': 'application/json' }
+            headers: {'Content-Type': 'application/json'}
         });
     }
 
@@ -108,6 +108,6 @@ function handleWebhookError(error: Error) {
         message: error.message
     }), {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: {'Content-Type': 'application/json'}
     });
 }
