@@ -4,6 +4,7 @@ import { authOptions } from "@/app/utils/auth";
 import prisma from "@/app/utils/db";
 import { notFound, redirect } from "next/navigation";
 import { RecordingPlayer } from "@/app/components/RecordingPlayer";
+import {generateMediaUrl} from "@/lib/utils";
 
 async function getEventRecording(eventId: string, userId: bigint | number | undefined) {
   try {
@@ -80,7 +81,7 @@ export default async function RecordingPage({
           <p className="text-gray-400 mb-8">{recording.description}</p>
 
           <RecordingPlayer
-            recordingUrl={recording.recordingUrl}
+            recordingUrl={generateMediaUrl(recording.recordingUrl)}
             title={recording.title}
           />
         </div>
@@ -127,7 +128,7 @@ export default async function RecordingPage({
           <h1 className="text-3xl font-bold mb-4">{data.title}</h1>
 
           <RecordingPlayer
-            recordingUrl={data.recordingUrl}
+            recordingUrl={generateMediaUrl(data.recordingUrl)}
             title={data.title}
           />
         </div>

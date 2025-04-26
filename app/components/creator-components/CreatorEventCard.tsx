@@ -12,6 +12,7 @@ import {useState} from "react";
 import { Video } from 'lucide-react';
 import {EventPreviewModal} from "@/app/components/EventPreviewModal";
 import { useSession } from "next-auth/react";
+import {generateMediaUrl} from "@/lib/utils";
 
 interface CreatorEventCardProps {
     event: any;
@@ -89,7 +90,7 @@ export function CreatorEventCard({ event, ticketsSold, revenue }: CreatorEventCa
                         >
                             {event.imageUrl && (
                               <Image
-                                src={event.imageUrl}
+                                src={generateMediaUrl(event.imageUrl)}
                                 alt={event.title}
                                 fill
                                 className="object-cover"

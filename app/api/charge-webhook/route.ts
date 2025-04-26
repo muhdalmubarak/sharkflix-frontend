@@ -2,6 +2,7 @@
 import {NextResponse} from "next/server";
 import {OptimizedPaymentService} from "@/services/optimized-payment.service";
 import EmailQueueService from "@/services/emailQueue.service";
+import {generateMediaUrl} from "@/lib/utils";
 
 export const maxDuration = 1800; // This function can run for a maximum of 300 seconds
 
@@ -79,7 +80,7 @@ async function queueNotifications(formData: FormData, data: any) {
                 userEmail: customerEmail,
                 transactionId: formData.get('transaction_id')?.toString() || '',
                 amount: formData.get('amount')?.toString() || '',
-                youtubeUrl: purchase.youtube_url
+                youtubeUrl: generateMediaUrl(purchase.youtube_url)
             });
         }
     }

@@ -154,13 +154,10 @@ export class OptimizedPaymentService {
         }
 
         // Handle video purchase
-        const movie = await tx.movie.findFirst({
-            where: {youtubeString: effectiveOrderId},
-            select: {id: true, userId: true, commissionPercentage: true, isaffiliate: true}
-        });
-
-        if (movie) {
-            return this.processVideoPaymentCritical(tx, movie, data);
+        const movieIdMatch = effectiveOrderId.match(/MOVIE_(\d+)_(\d+)/);
+        if (movieIdMatch) {
+            const movieId = parseInt(movieIdMatch[1]);
+            return this.processVideoPaymentCritical(tx, movieId, data);
         }
 
         throw new Error(`Unrecognized order format: ${effectiveOrderId}`);
@@ -218,7 +215,18 @@ export class OptimizedPaymentService {
         return {ticket, payment, event};
     }
 
-    private static async processVideoPaymentCritical(tx: any, movie: any, data: WebhookData) {
+    private static async processVideoPaymentCritical(tx: any, movieId: number, data: WebhookData) {
+        // Get movie details
+        const movie = await tx.movie.findUnique({
+            where: {id: movieId},
+            select: {id: true, userId: true, commissionPercentage: true, isaffiliate: true, youtubeString: true}
+        });
+
+        if (!movie) {
+            throw new Error(`Movie not found: ${movieId}`);
+        }
+
+        // Find or create the customer
         const customer = await tx.user.findUnique({
             where: {email: data.customer_email}
         });
@@ -232,7 +240,7 @@ export class OptimizedPaymentService {
             tx.purchased_videos.create({
                 data: {
                     user_email: data.customer_email,
-                    youtube_url: data.order_id,
+                    youtube_url: movie.youtubeString,
                 },
             }),
             this.processVideoRevenueParallel(tx, movie, data, customer.id)

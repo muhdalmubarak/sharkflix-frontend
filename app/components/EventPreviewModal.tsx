@@ -1,17 +1,18 @@
 // app/components/EventPreviewModal.tsx
 "use client";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { format } from "date-fns";
+import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
+import {format} from "date-fns";
 import ReactPlayer from "react-player";
-import { Button } from "@/components/ui/button";
+import {Button} from "@/components/ui/button";
 import {useEffect, useState} from "react";
-import { useRouter } from "next/navigation";
+import {useRouter} from "next/navigation";
 import {BookTicketButton} from "@/app/components/BookTicketButton";
 import Image from "next/image";
 import {CheckCircle, Share2} from "lucide-react";
-import  {USER_ROLES } from "@/app/utils/constants";
+import {USER_ROLES} from "@/app/utils/constants";
 import {toast} from "@/hooks/use-toast";
+import {generateMediaUrl} from "@/lib/utils";
 
 interface EventPreviewModalProps {
     open: boolean;
@@ -36,26 +37,26 @@ interface EventPreviewModalProps {
 }
 
 export function EventPreviewModal({
-  open,
-  onOpenChange,
-  title,
-  description,
-  trailerUrl,
-  date,
-  bookingDate,
-  price,
-  soldOut,
-  availableTickets,
-  isBookingOpen,
-  eventId,
-  hasTicket,
-  userEmail,
-    imageUrl,
-    showActions = true, // Default to true for regular users
-    currentUser,
-  onBookingAttempt,
-  isGuestFlow = false
-}: EventPreviewModalProps) {
+                                      open,
+                                      onOpenChange,
+                                      title,
+                                      description,
+                                      trailerUrl,
+                                      date,
+                                      bookingDate,
+                                      price,
+                                      soldOut,
+                                      availableTickets,
+                                      isBookingOpen,
+                                      eventId,
+                                      hasTicket,
+                                      userEmail,
+                                      imageUrl,
+                                      showActions = true, // Default to true for regular users
+                                      currentUser,
+                                      onBookingAttempt,
+                                      isGuestFlow = false
+                                  }: EventPreviewModalProps) {
     const [reminderSet, setReminderSet] = useState(false);
     const [copied, setCopied] = useState(false);
     const router = useRouter();
@@ -83,22 +84,22 @@ export function EventPreviewModal({
         }
 
         navigator.clipboard.writeText(finalLink)
-        .then(() => {
-            setCopied(true);
-            toast({
-                title: "Link Copied",
-                description: "Share link copied to clipboard"
+            .then(() => {
+                setCopied(true);
+                toast({
+                    title: "Link Copied",
+                    description: "Share link copied to clipboard"
+                });
+                setTimeout(() => setCopied(false), 2000);
+            })
+            .catch((err) => {
+                console.error("Failed to copy link:", err);
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: "Failed to copy share link"
+                });
             });
-            setTimeout(() => setCopied(false), 2000);
-        })
-        .catch((err) => {
-            console.error("Failed to copy link:", err);
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: "Failed to copy share link"
-            });
-        });
     };
 
     const handleSetReminder = async () => {
@@ -153,158 +154,158 @@ export function EventPreviewModal({
         return value.toFixed(2);
     };
 
-return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-[95%] max-w-5xl max-h-[90vh] overflow-y-auto sm:w-full">
-            <DialogHeader>
-                <DialogTitle>{title}</DialogTitle>
-            </DialogHeader>
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="w-[95%] max-w-5xl max-h-[90vh] overflow-y-auto sm:w-full">
+                <DialogHeader>
+                    <DialogTitle>{title}</DialogTitle>
+                </DialogHeader>
 
-            <div className="space-y-4">
-                {/* Trailer Video - Changed to 16:9 aspect ratio */}
-                <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-black">
-                    {trailerUrl ? (
-                        <ReactPlayer
-                            url={trailerUrl}
-                            width="100%"
-                            height="100%"
-                            controls
-                            config={{
-                                file: {
-                                    attributes: {
-                                        controlsList: "nodownload"
+                <div className="space-y-4">
+                    {/* Trailer Video - Changed to 16:9 aspect ratio */}
+                    <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-black">
+                        {trailerUrl ? (
+                            <ReactPlayer
+                                url={generateMediaUrl(trailerUrl)}
+                                width="100%"
+                                height="100%"
+                                controls
+                                config={{
+                                    file: {
+                                        attributes: {
+                                            controlsList: "nodownload"
+                                        }
                                     }
-                                }
-                            }}
-                        />
-                    ) : (
-                        <Image
-                            src={imageUrl}
-                            alt={title}
-                            fill
-                            className="object-contain"
-                            priority
-                        />
-                    )}
-                </div>
-
-                {/* Event Details */}
-                <div className="space-y-2">
-                    <p className="text-gray-200">{description}</p>
-
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                            <p className="text-gray-400">Event Date</p>
-                            <p>{formatDate(date)}</p>
-                        </div>
-                        {!isGuestFlow && (
-                            <div>
-                                <p className="text-gray-400">Price</p>
-                                <p className="text-green-500 font-bold">
-                                    🛒 {formatPrice(price)} MYR
-                                </p>
-                            </div>
+                                }}
+                            />
+                        ) : (
+                            <Image
+                                src={generateMediaUrl(imageUrl)}
+                                alt={title}
+                                fill
+                                className="object-contain"
+                                priority
+                            />
                         )}
-                        {isCreator && (
-                            <div>
-                                <p className="text-gray-400">Available Tickets</p>
-                                <p>{availableTickets}</p>
-                            </div>
-                        )}
-                        <div>
-                            <p className="text-gray-400">Booking Opens</p>
-                            <p>{formatDate(bookingDate)}</p>
-                        </div>
                     </div>
 
-                    {!isBookingOpen && bookingDate && (
-                        <div className="bg-yellow-500/20 text-yellow-500 p-3 rounded-lg">
-                            Booking will be available from {formatDate(bookingDate)}
-                        </div>
-                    )}
+                    {/* Event Details */}
+                    <div className="space-y-2">
+                        <p className="text-gray-200">{description}</p>
 
-                    {soldOut && (
-                        <div className="bg-red-500/20 text-red-500 p-3 rounded-lg">
-                            This event tickets are sold out
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <p className="text-gray-400">Event Date</p>
+                                <p>{formatDate(date)}</p>
+                            </div>
+                            {!isGuestFlow && (
+                                <div>
+                                    <p className="text-gray-400">Price</p>
+                                    <p className="text-green-500 font-bold">
+                                        🛒 {formatPrice(price)} MYR
+                                    </p>
+                                </div>
+                            )}
+                            {isCreator && (
+                                <div>
+                                    <p className="text-gray-400">Available Tickets</p>
+                                    <p>{availableTickets}</p>
+                                </div>
+                            )}
+                            <div>
+                                <p className="text-gray-400">Booking Opens</p>
+                                <p>{formatDate(bookingDate)}</p>
+                            </div>
                         </div>
-                    )}
-                </div>
-            </div>
 
-            {/* Actions section - modified to respect soldOut in all flows */}
-            {showActions && (
-                <div className="mt-4">
-                    <BookTicketButton
-                        eventId={eventId}
-                        hasTicket={hasTicket}
-                        isAvailable={availableTickets > 0 && !soldOut}
-                        isBookingOpen={isBookingOpen}
-                        userEmail={userEmail}
-                        soldOut={soldOut}
-                        title={title}
-                        price={Number(price)}
-                        onSetReminder={handleSetReminder}
-                        onBookingAttempt={onBookingAttempt}
-                        isGuestFlow={isGuestFlow}
-                    />
-                    {reminderSet && !isBookingOpen && (
-                        <p className="text-xs text-green-500 mt-1">
-                            ✓ Reminder set for booking opening
-                        </p>
-                    )}
+                        {!isBookingOpen && bookingDate && (
+                            <div className="bg-yellow-500/20 text-yellow-500 p-3 rounded-lg">
+                                Booking will be available from {formatDate(bookingDate)}
+                            </div>
+                        )}
+
+                        {soldOut && (
+                            <div className="bg-red-500/20 text-red-500 p-3 rounded-lg">
+                                This event tickets are sold out
+                            </div>
+                        )}
+                    </div>
                 </div>
-            )}
+
+                {/* Actions section - modified to respect soldOut in all flows */}
+                {showActions && (
+                    <div className="mt-4">
+                        <BookTicketButton
+                            eventId={eventId}
+                            hasTicket={hasTicket}
+                            isAvailable={availableTickets > 0 && !soldOut}
+                            isBookingOpen={isBookingOpen}
+                            userEmail={userEmail}
+                            soldOut={soldOut}
+                            title={title}
+                            price={Number(price)}
+                            onSetReminder={handleSetReminder}
+                            onBookingAttempt={onBookingAttempt}
+                            isGuestFlow={isGuestFlow}
+                        />
+                        {reminderSet && !isBookingOpen && (
+                            <p className="text-xs text-green-500 mt-1">
+                                ✓ Reminder set for booking opening
+                            </p>
+                        )}
+                    </div>
+                )}
 
                 {/* Add Share Button Section */}
                 {canShare && (
-                  <div className="mt-4 pt-4 border-t border-gray-700">
-                      <div className="flex flex-col gap-2">
-                          <p className="text-sm text-gray-400">
-                              {isAffiliate
-                                ? "Share this event (Affiliate Link)"
-                                : isCreator
-                                  ? "Share this event"
-                                  : "Share with friends"}
-                          </p>
-                          <Button
-                            variant="outline"
-                            onClick={handleShare}
-                            className="w-full flex items-center justify-center gap-2"
-                            size="sm"
-                          >
-                              {copied ? (
-                                <span className="text-green-500 flex items-center gap-2">
-                                        <CheckCircle className="h-4 w-4" />
+                    <div className="mt-4 pt-4 border-t border-gray-700">
+                        <div className="flex flex-col gap-2">
+                            <p className="text-sm text-gray-400">
+                                {isAffiliate
+                                    ? "Share this event (Affiliate Link)"
+                                    : isCreator
+                                        ? "Share this event"
+                                        : "Share with friends"}
+                            </p>
+                            <Button
+                                variant="outline"
+                                onClick={handleShare}
+                                className="w-full flex items-center justify-center gap-2"
+                                size="sm"
+                            >
+                                {copied ? (
+                                    <span className="text-green-500 flex items-center gap-2">
+                                        <CheckCircle className="h-4 w-4"/>
                                         Link Copied!
                                     </span>
-                              ) : (
-                                <>
-                                    <Share2 className="h-4 w-4" />
-                                    {isAffiliate
-                                      ? "Copy Affiliate Link"
-                                      : isCreator
-                                        ? "Copy Event Link"
-                                        : "Copy Share Link"}
-                                </>
-                              )}
-                          </Button>
-                          {isAffiliate && currentUser?.AFFCode && (
-                            <p className="text-xs text-gray-500 text-center">
-                                Earn commission when people book through your link
-                            </p>
-                          )}
-                          {isCreator && (
-                            <p className="text-xs text-gray-500 text-center">
-                                Share your event with potential attendees
-                            </p>
-                          )}
-                          {!isCreator && !isAffiliate && isUser && (
-                            <p className="text-xs text-gray-500 text-center">
-                                Share this event with your friends
-                            </p>
-                          )}
-                      </div>
-                  </div>
+                                ) : (
+                                    <>
+                                        <Share2 className="h-4 w-4"/>
+                                        {isAffiliate
+                                            ? "Copy Affiliate Link"
+                                            : isCreator
+                                                ? "Copy Event Link"
+                                                : "Copy Share Link"}
+                                    </>
+                                )}
+                            </Button>
+                            {isAffiliate && currentUser?.AFFCode && (
+                                <p className="text-xs text-gray-500 text-center">
+                                    Earn commission when people book through your link
+                                </p>
+                            )}
+                            {isCreator && (
+                                <p className="text-xs text-gray-500 text-center">
+                                    Share your event with potential attendees
+                                </p>
+                            )}
+                            {!isCreator && !isAffiliate && isUser && (
+                                <p className="text-xs text-gray-500 text-center">
+                                    Share this event with your friends
+                                </p>
+                            )}
+                        </div>
+                    </div>
                 )}
             </DialogContent>
         </Dialog>

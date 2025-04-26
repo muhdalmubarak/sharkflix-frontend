@@ -3,6 +3,7 @@ import { authOptions } from "@/app/utils/auth";
 import prisma from "@/app/utils/db";
 import { getServerSession } from "next-auth";
 import Image from "next/image";
+import {generateMediaUrl} from "@/lib/utils";
 
 async function getData(category: string, userId: number) {
   
@@ -111,7 +112,7 @@ export default async function CategoryPage({
           >
             <div className="aspect-[16/9] relative w-full">
               <Image
-                src={movie.imageString}
+                src={generateMediaUrl(movie.imageString)}
                 alt={movie.title}
                 fill
                 className="object-cover"

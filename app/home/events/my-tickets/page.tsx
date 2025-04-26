@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Download, ArrowRight, ArrowUpRight, Video } from "lucide-react";
 import Link from "next/link";
 import { DownloadTicketButton } from "@/app/components/admin-components/DownloadTicketButton";
+import {generateMediaUrl} from "@/lib/utils";
 
 async function getUserTickets(userId: number) {
     const tickets = await prisma.tickets.findMany({
@@ -74,7 +75,7 @@ export default async function MyTicketsPage() {
                             <div className="relative w-full md:w-48 h-32">
                                 {ticket?.event?.imageUrl && (
                                   <Image
-                                    src={ticket.event.imageUrl}
+                                    src={generateMediaUrl(ticket.event.imageUrl)}
                                     alt={ticket.event.title}
                                     fill
                                     className="object-cover rounded-lg"

@@ -1,8 +1,8 @@
 // services/payhalal-webhook.service.ts
 import prisma from "@/app/utils/db";
-import { generatePayHalalCallbackHash } from "@/app/utils/hash";
-import { NotificationService } from "@/services/notification.service";
-import { v4 as uuidv4 } from 'uuid';
+import {generatePayHalalCallbackHash} from "@/app/utils/hash";
+import {NotificationService} from "@/services/notification.service";
+import {v4 as uuidv4} from 'uuid';
 import {Prisma} from "@prisma/client";
 
 interface WebhookData {
@@ -123,8 +123,8 @@ export class PayHalalWebhookService {
     private static async handleFailedPayment(data: WebhookData): Promise<PaymentResult> {
         return prisma.$transaction(async (tx: any) => {
             const existingPayment = await tx.payments.findUnique({
-                where: { transactionId: data.transaction_id },
-                include: { ticket: true }
+                where: {transactionId: data.transaction_id},
+                include: {ticket: true}
             });
 
             if (existingPayment) {
@@ -149,22 +149,22 @@ export class PayHalalWebhookService {
     private static async updatePaymentToFailed(tx: any, existingPayment: any) {
         // Update payment status
         await tx.payments.update({
-            where: { id: existingPayment.id },
-            data: { status: 'failed' }
+            where: {id: existingPayment.id},
+            data: {status: 'failed'}
         });
 
         // Update ticket status
         await tx.tickets.update({
-            where: { id: existingPayment.ticket.id },
-            data: { status: 'cancelled' }
+            where: {id: existingPayment.ticket.id},
+            data: {status: 'cancelled'}
         });
 
         // Release ticket back to pool
         if (existingPayment.ticket.eventId) {
             await tx.events.update({
-                where: { id: existingPayment.ticket.eventId },
+                where: {id: existingPayment.ticket.eventId},
                 data: {
-                    availableTickets: { increment: 1 }
+                    availableTickets: {increment: 1}
                 }
             });
         }
@@ -190,12 +190,10 @@ export class PayHalalWebhookService {
         }
 
         // Handle video purchase
-        const movie = await tx.movie.findFirst({
-            where: { youtubeString: effectiveOrderId },
-            select: { id: true, userId: true, commissionPercentage: true, isaffiliate: true }
-        });
-        if (movie) {
-            return this.processVideoPayment(tx, movie, data);
+        const movieIdMatch = effectiveOrderId.match(/MOVIE_(\d+)_(\d+)/);
+        if (movieIdMatch) {
+            const movieId = parseInt(movieIdMatch[1]);
+            return this.processVideoPayment(tx, movieId, data);
         }
 
         throw new Error(`Unrecognized order format: ${effectiveOrderId}`);
@@ -204,7 +202,7 @@ export class PayHalalWebhookService {
     private static async processEventPayment(tx: Prisma.TransactionClient, eventId: number, data: WebhookData): Promise<any> {
         // Get event details
         const event = await tx.events.findUnique({
-            where: { id: eventId },
+            where: {id: eventId},
             select: {
                 id: true,
                 title: true,
@@ -226,7 +224,7 @@ export class PayHalalWebhookService {
 
         // Find or create user
         const user = await tx.user.findUnique({
-            where: { email: data.customer_email }
+            where: {email: data.customer_email}
         });
 
         // Create ticket
@@ -253,7 +251,7 @@ export class PayHalalWebhookService {
 
         // Update available tickets
         await tx.events.update({
-            where: { id: eventId },
+            where: {id: eventId},
             data: {
                 availableTickets: {
                     decrement: 1
@@ -264,13 +262,23 @@ export class PayHalalWebhookService {
         // Process revenues
         await this.processEventRevenues(tx, eventId, data);
 
-        return { ticket, payment, event };
+        return {ticket, payment, event};
     }
 
-    private static async processVideoPayment(tx: any, movie: any, data: WebhookData): Promise<any> {
+    private static async processVideoPayment(tx: any, movieId: number, data: WebhookData): Promise<any> {
+        // Get movie details
+        const movie = await tx.movie.findUnique({
+            where: {id: movieId},
+            select: {id: true, userId: true, commissionPercentage: true, isaffiliate: true, youtubeString: true}
+        });
+
+        if (!movie) {
+            throw new Error(`Movie not found: ${movieId}`);
+        }
+
         // Find or create the customer
         const customer = await tx.user.findUnique({
-            where: { email: data.customer_email }
+            where: {email: data.customer_email}
         });
 
         if (!customer) {
@@ -280,7 +288,7 @@ export class PayHalalWebhookService {
         const purchase = await tx.purchased_videos.create({
             data: {
                 user_email: data.customer_email,
-                youtube_url: data.order_id,
+                youtube_url: movie.youtubeString,
             },
         });
 
@@ -288,33 +296,33 @@ export class PayHalalWebhookService {
         if (movie) {
             const creatorId = Number(movie.userId);
             await this.calculateAndStoreCreatorRevenue(
-              tx,
-              data,
-              'movie',
-              movie.id,
-              creatorId,
-              customer.id // Pass customer.id as referredUserId
+                tx,
+                data,
+                'movie',
+                movie.id,
+                creatorId,
+                customer.id // Pass customer.id as referredUserId
             );
 
             // Process affiliate revenue if applicable
             if (movie.isaffiliate && movie.commissionPercentage) {
                 await this.calculateAndStoreAffiliateRevenue(
-                  tx,
-                  data,
-                  'movie',
-                  movie.id,
-                  Number(movie.commissionPercentage),
-                  customer.id // Pass customer.id as referredUserId
+                    tx,
+                    data,
+                    'movie',
+                    movie.id,
+                    Number(movie.commissionPercentage),
+                    customer.id // Pass customer.id as referredUserId
                 );
             }
         }
 
-        return { purchase };
+        return {purchase};
     }
 
     private static async processEventRevenues(tx: any, eventId: number, data: WebhookData): Promise<void> {
         const event = await tx.events.findUnique({
-            where: { id: eventId },
+            where: {id: eventId},
             select: {
                 id: true,
                 userId: true,
@@ -329,7 +337,7 @@ export class PayHalalWebhookService {
 
         // Find the customer who made the purchase
         const customer = await tx.user.findUnique({
-            where: { email: data.customer_email }
+            where: {email: data.customer_email}
         });
 
         if (!customer) {
@@ -338,43 +346,43 @@ export class PayHalalWebhookService {
 
         // Process creator revenue
         await this.calculateAndStoreCreatorRevenue(
-          tx,
-          data,
-          'event',
-          eventId,
-          event.userId,
-          customer.id // Pass customer.id as referredUserId
+            tx,
+            data,
+            'event',
+            eventId,
+            event.userId,
+            customer.id // Pass customer.id as referredUserId
         );
 
         // Process affiliate revenue if applicable
         if (event.isaffiliate && event.commissionPercentage) {
             await this.calculateAndStoreAffiliateRevenue(
-              tx,
-              data,
-              'event',
-              eventId,
-              Number(event.commissionPercentage),
-              customer.id // Pass customer.id as referredUserId
+                tx,
+                data,
+                'event',
+                eventId,
+                Number(event.commissionPercentage),
+                customer.id // Pass customer.id as referredUserId
             );
         }
     }
 
     private static async calculateAndStoreAffiliateRevenue(
-      tx: any,
-      purchaseData: WebhookData,
-      sourceType: 'movie' | 'event',
-      sourceId: number,
-      commissionPercentage: number,
-      referredUserId: number // Add referredUserId parameter
+        tx: any,
+        purchaseData: WebhookData,
+        sourceType: 'movie' | 'event',
+        sourceId: number,
+        commissionPercentage: number,
+        referredUserId: number // Add referredUserId parameter
     ): Promise<void> {
         // Find the customer
         const customer = await tx.user.findUnique({
-            where: { email: purchaseData.customer_email },
+            where: {email: purchaseData.customer_email},
             include: {
                 referredByUser: {
                     select: {
                         affiliateUser: {
-                            select: { id: true }
+                            select: {id: true}
                         }
                     }
                 }
@@ -400,20 +408,20 @@ export class PayHalalWebhookService {
 
         // Option 1: Update total_revenue (if this is the intended behavior)
         await tx.user.update({
-            where: { id: affiliateId },
+            where: {id: affiliateId},
             data: {
-                total_revenue: { increment: amount }
+                total_revenue: {increment: amount}
             }
         });
     }
 
     private static async calculateAndStoreCreatorRevenue(
-      tx: any,
-      purchaseData: WebhookData,
-      sourceType: 'movie' | 'event',
-      sourceId: number,
-      creatorId: number,
-      referredUserId: number // Add referredUserId parameter
+        tx: any,
+        purchaseData: WebhookData,
+        sourceType: 'movie' | 'event',
+        sourceId: number,
+        creatorId: number,
+        referredUserId: number // Add referredUserId parameter
     ): Promise<void> {
         // Store the full amount without commission
         const amount = Number(parseFloat(purchaseData.amount).toFixed(2));
@@ -432,9 +440,9 @@ export class PayHalalWebhookService {
 
         // Update creator's current balance
         await tx.user.update({
-            where: { id: creatorId },
+            where: {id: creatorId},
             data: {
-                total_revenue: { increment: amount }
+                total_revenue: {increment: amount}
             }
         });
     }
@@ -443,8 +451,8 @@ export class PayHalalWebhookService {
     static async processRefund(transactionId: string): Promise<PaymentResult> {
         return prisma.$transaction(async (tx: any) => {
             const payment = await tx.payments.findUnique({
-                where: { transactionId },
-                include: { ticket: true }
+                where: {transactionId},
+                include: {ticket: true}
             });
 
             if (!payment) {
@@ -453,41 +461,41 @@ export class PayHalalWebhookService {
 
             // Update payment status
             await tx.payments.update({
-                where: { id: payment.id },
-                data: { status: 'refunded' }
+                where: {id: payment.id},
+                data: {status: 'refunded'}
             });
 
             // Update ticket status
             if (payment.ticket) {
                 await tx.tickets.update({
-                    where: { id: payment.ticket.id },
-                    data: { status: 'refunded' }
+                    where: {id: payment.ticket.id},
+                    data: {status: 'refunded'}
                 });
 
                 // Return ticket to available pool
                 await tx.events.update({
-                    where: { id: payment.ticket.eventId },
+                    where: {id: payment.ticket.eventId},
                     data: {
-                        availableTickets: { increment: 1 }
+                        availableTickets: {increment: 1}
                     }
                 });
             }
 
             // Reverse revenue entries
             await tx.creatorRevenue.updateMany({
-                where: { transactionId },
-                data: { status: 'refunded' }
+                where: {transactionId},
+                data: {status: 'refunded'}
             });
 
             await tx.affiliateRevenue.updateMany({
-                where: { transactionId },
-                data: { status: 'refunded' }
+                where: {transactionId},
+                data: {status: 'refunded'}
             });
 
             return {
                 success: true,
                 status: 'refunded',
-                data: { transactionId }
+                data: {transactionId}
             };
         });
     }

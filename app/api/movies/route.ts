@@ -1,4 +1,4 @@
-// app/api/events/route.ts
+// app/api/movie/route.ts
 import {NextResponse} from "next/server";
 import {getServerSession} from "next-auth";
 import {authOptions} from "@/app/utils/auth";
@@ -13,17 +13,16 @@ export async function POST(request: Request) {
 
         const data = await request.json();
 
-        const event = await prisma.events.create({
+        const movie = await prisma.movie.create({
             data: {
                 ...data,
-                date: new Date(data.date), // Convert to Date object
                 userId: session.user?.id,
             },
         });
 
-        return NextResponse.json(event);
+        return NextResponse.json(movie);
     } catch (error) {
-        console.error("Error creating event:", error);
-        return new Response("Error creating event", {status: 500});
+        console.error("Error creating movie:", error);
+        return NextResponse.json({error: "Error creating movie"}, {status: 500});
     }
 }

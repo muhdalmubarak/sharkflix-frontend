@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from "next/image";
 import { MovieCard } from "./MovieCard";
+import {generateMediaUrl} from "@/lib/utils";
 
 interface WatchList {
   id: number;
@@ -58,7 +59,7 @@ const RecentlyAddedClient: React.FC<RecentlyAddedClientProps> = ({ data, userEma
                   transform transition-all duration-300 hover:scale-105`}>
     <div className="aspect-[16/9] relative w-full">
       <Image
-        src={movie.imageString}
+        src={generateMediaUrl(movie.imageString)}
         alt={movie.title}
         fill
         className="object-cover"

@@ -1,20 +1,15 @@
 // app/components/creator-components/EditEventDialog.tsx
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/shadcn-ui/textarea";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Label } from "@/components/shadcn-ui/label";
-import { Checkbox } from "@/components/shadcn-ui/checkbox";
-import { supabase } from "@/lib/supabase/client";
+import {Button} from "@/components/ui/button";
+import {Dialog, DialogContent, DialogHeader, DialogTitle,} from "@/components/ui/dialog";
+import {Input} from "@/components/ui/input";
+import {Textarea} from "@/components/shadcn-ui/textarea";
+import {useEffect, useState} from "react";
+import {useRouter} from "next/navigation";
+import {Label} from "@/components/shadcn-ui/label";
+import {Checkbox} from "@/components/shadcn-ui/checkbox";
+import {uploadToStorage} from "@/app/utils/uploader";
 
 interface EditEventDialogProps {
     event: any;
@@ -22,7 +17,7 @@ interface EditEventDialogProps {
     onOpenChange: (open: boolean) => void;
 }
 
-export function EditEventDialog({ event, open, onOpenChange }: EditEventDialogProps) {
+export function EditEventDialog({event, open, onOpenChange}: EditEventDialogProps) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [imageFile, setImageFile] = useState<File | null>(null);
@@ -55,8 +50,8 @@ export function EditEventDialog({ event, open, onOpenChange }: EditEventDialogPr
         const date = new Date(dateStr);
         // Get local ISO string and slice off the timezone part
         const localDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
-          .toISOString()
-          .slice(0, 16);
+            .toISOString()
+            .slice(0, 16);
         return localDate;
     };
 
@@ -124,23 +119,8 @@ export function EditEventDialog({ event, open, onOpenChange }: EditEventDialogPr
         }
     };
 
-    const uploadToSupabase = async (file: File, path: string): Promise<string> => {
-        const { data, error } = await supabase.storage
-            .from('video_videohub')
-            .upload(path, file, {
-                cacheControl: "3600",
-                upsert: true,
-            });
-
-        if (error) {
-            throw new Error(error.message);
-        }
-
-        return `https://zdcryvewjhsccriuzltq.supabase.co/storage/v1/object/public/${data.fullPath}`;
-    };
-
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: value
@@ -189,21 +169,21 @@ export function EditEventDialog({ event, open, onOpenChange }: EditEventDialogPr
 
             if (imageFile) {
                 const normalizedImageName = normalizeFilename(imageFile.name);
-                const imagePath = `video_videohub/event-images/${normalizedImageName}`;
-                imageUrl = await uploadToSupabase(imageFile, imagePath);
+                const imagePath = `event-images/${normalizedImageName}`;
+                imageUrl = await uploadToStorage(imageFile, imagePath);
             }
 
             if (trailerFile) {
                 const normalizedTrailerName = normalizeFilename(trailerFile.name);
-                const trailerPath = `video_videohub/event-trailers/${normalizedTrailerName}`;
-                trailerUrl = await uploadToSupabase(trailerFile, trailerPath);
+                const trailerPath = `event-trailers/${normalizedTrailerName}`;
+                trailerUrl = await uploadToStorage(trailerFile, trailerPath);
             }
 
             // Upload recording file if provided
             if (recordingFile) {
                 const normalizedRecordingName = normalizeFilename(recordingFile.name);
-                const recordingPath = `video_videohub/event-recordings/${normalizedRecordingName}`;
-                recordingUrl = await uploadToSupabase(recordingFile, recordingPath);
+                const recordingPath = `event-recordings/${normalizedRecordingName}`;
+                recordingUrl = await uploadToStorage(recordingFile, recordingPath);
             }
 
             // Determine if we need a new access code
@@ -274,88 +254,88 @@ export function EditEventDialog({ event, open, onOpenChange }: EditEventDialogPr
                         <div className="space-y-2">
                             <Label htmlFor="title">Event Title</Label>
                             <Input
-                              id="title"
-                              name="title"
-                              value={formData.title}
-                              onChange={handleInputChange}
-                              placeholder="Enter event title"
-                              required
+                                id="title"
+                                name="title"
+                                value={formData.title}
+                                onChange={handleInputChange}
+                                placeholder="Enter event title"
+                                required
                             />
                         </div>
 
                         <div className="space-y-2">
                             <Label htmlFor="description">Description</Label>
                             <Textarea
-                              id="description"
-                              name="description"
-                              value={formData.description}
-                              onChange={handleInputChange}
-                              placeholder="Enter event description"
-                              required
+                                id="description"
+                                name="description"
+                                value={formData.description}
+                                onChange={handleInputChange}
+                                placeholder="Enter event description"
+                                required
                             />
                         </div>
 
                         <div className="space-y-2">
                             <Label htmlFor="date">Event Date and Time</Label>
                             <Input
-                              id="date"
-                              name="date"
-                              type="datetime-local"
-                              value={formData.date}
-                              onChange={handleInputChange}
-                              required
-                              className="dark:text-white dark:[color-scheme:dark]"
+                                id="date"
+                                name="date"
+                                type="datetime-local"
+                                value={formData.date}
+                                onChange={handleInputChange}
+                                required
+                                className="dark:text-white dark:[color-scheme:dark]"
                             />
                         </div>
 
                         <div className="space-y-2">
                             <Label htmlFor="bookingDate">Booking Start Date and Time</Label>
                             <Input
-                              id="bookingDate"
-                              name="bookingDate"
-                              type="datetime-local"
-                              value={formData.bookingDate}
-                              onChange={handleInputChange}
-                              required
-                              className="dark:text-white dark:[color-scheme:dark]"
+                                id="bookingDate"
+                                name="bookingDate"
+                                type="datetime-local"
+                                value={formData.bookingDate}
+                                onChange={handleInputChange}
+                                required
+                                className="dark:text-white dark:[color-scheme:dark]"
                             />
                         </div>
 
                         <div className="space-y-2">
                             <Label htmlFor="price">Price (MYR)</Label>
                             <Input
-                              id="price"
-                              name="price"
-                              type="number"
-                              value={formData.price}
-                              onChange={handleInputChange}
-                              placeholder="Enter price"
-                              min="0"
-                              step="0.01"
-                              required
+                                id="price"
+                                name="price"
+                                type="number"
+                                value={formData.price}
+                                onChange={handleInputChange}
+                                placeholder="Enter price"
+                                min="0"
+                                step="0.01"
+                                required
                             />
                         </div>
 
                         <div className="space-y-2">
                             <Label htmlFor="totalTickets">Total Tickets</Label>
                             <Input
-                              id="totalTickets"
-                              name="totalTickets"
-                              type="number"
-                              value={formData.totalTickets}
-                              onChange={handleInputChange}
-                              placeholder="Enter total number of tickets"
-                              min="1"
-                              required
+                                id="totalTickets"
+                                name="totalTickets"
+                                type="number"
+                                value={formData.totalTickets}
+                                onChange={handleInputChange}
+                                placeholder="Enter total number of tickets"
+                                min="1"
+                                required
                             />
                         </div>
 
                         <div className="space-y-2">
                             <div className="flex items-center space-x-2">
                                 <Checkbox
-                                  id="soldOut"
-                                  checked={soldOut}
-                                  onCheckedChange={handleSoldOutChange}
+                                    id="soldOut"
+                                    checked={soldOut}
+                                    onCheckedChange={handleSoldOutChange}
                                 />
                                 <Label htmlFor="soldOut">Mark as Sold Out</Label>
                             </div>
@@ -364,114 +344,114 @@ export function EditEventDialog({ event, open, onOpenChange }: EditEventDialogPr
                         <div className="space-y-2">
                             <Label htmlFor="imageUrl">Update Thumbnail Image</Label>
                             <Input
-                              type="file"
-                              id="imageUrl"
-                              accept="image/*"
-                              onChange={handleImageChange}
+                                type="file"
+                                id="imageUrl"
+                                accept="image/*"
+                                onChange={handleImageChange}
                             />
                             {event.imageUrl && !imageFile && (
-                              <p className="text-sm text-muted-foreground mt-1">
-                                  Current image will be kept if no new image is uploaded
-                              </p>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                    Current image will be kept if no new image is uploaded
+                                </p>
                             )}
                         </div>
 
                         <div className="space-y-2">
                             <Label htmlFor="trailer">Update Trailer Video</Label>
                             <Input
-                              type="file"
-                              id="trailer"
-                              accept="video/*"
-                              onChange={handleTrailerChange}
+                                type="file"
+                                id="trailer"
+                                accept="video/*"
+                                onChange={handleTrailerChange}
                             />
                             {event.trailerUrl && !trailerFile && (
-                              <p className="text-sm text-muted-foreground mt-1">
-                                  Current trailer will be kept if no new video is uploaded
-                              </p>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                    Current trailer will be kept if no new video is uploaded
+                                </p>
                             )}
                         </div>
 
                         <div className="space-y-2">
                             <Label htmlFor="recording">Update Event Recording</Label>
                             <Input
-                              type="file"
-                              id="recording"
-                              accept="video/*"
-                              onChange={handleRecordingChange}
+                                type="file"
+                                id="recording"
+                                accept="video/*"
+                                onChange={handleRecordingChange}
                             />
                             {event.recordingUrl && !recordingFile && (
-                              <p className="text-sm text-muted-foreground mt-1">
-                                  Current recording will be kept if no new recording is uploaded
-                              </p>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                    Current recording will be kept if no new recording is uploaded
+                                </p>
                             )}
                         </div>
 
                         <div className="space-y-2">
                             <div className="flex items-center space-x-2">
                                 <Checkbox
-                                  id="allowRecordingAccess"
-                                  checked={allowRecordingAccess}
-                                  onCheckedChange={handleRecordingAccessChange}
+                                    id="allowRecordingAccess"
+                                    checked={allowRecordingAccess}
+                                    onCheckedChange={handleRecordingAccessChange}
                                 />
                                 <Label htmlFor="allowRecordingAccess">Enable Recording Access</Label>
                             </div>
                             {(event.recordingUrl || recordingFile) && allowRecordingAccess && (
-                              <>
-                                  <div className="mt-2 ml-6">
-                                      <div className="flex items-center space-x-2">
-                                          <Checkbox
-                                            id="generateNewAccessCode"
-                                            checked={generateNewAccessCode}
-                                            onCheckedChange={handleNewAccessCodeChange}
-                                          />
-                                          <Label htmlFor="generateNewAccessCode">Generate New Access Code</Label>
-                                      </div>
-                                      {event.recordingAccessCode && !generateNewAccessCode && (
-                                        <p className="text-sm text-muted-foreground mt-1">
-                                            Current access code: {event.recordingAccessCode}
-                                        </p>
-                                      )}
-                                  </div>
-                              </>
+                                <>
+                                    <div className="mt-2 ml-6">
+                                        <div className="flex items-center space-x-2">
+                                            <Checkbox
+                                                id="generateNewAccessCode"
+                                                checked={generateNewAccessCode}
+                                                onCheckedChange={handleNewAccessCodeChange}
+                                            />
+                                            <Label htmlFor="generateNewAccessCode">Generate New Access Code</Label>
+                                        </div>
+                                        {event.recordingAccessCode && !generateNewAccessCode && (
+                                            <p className="text-sm text-muted-foreground mt-1">
+                                                Current access code: {event.recordingAccessCode}
+                                            </p>
+                                        )}
+                                    </div>
+                                </>
                             )}
                         </div>
 
                         <div className="space-y-2">
                             <Label htmlFor="streamUrl">Stream URL</Label>
                             <Input
-                              id="streamUrl"
-                              name="streamUrl"
-                              value={formData.streamUrl}
-                              onChange={handleInputChange}
-                              placeholder="Enter YouTube or Similar service stream URL"
+                                id="streamUrl"
+                                name="streamUrl"
+                                value={formData.streamUrl}
+                                onChange={handleInputChange}
+                                placeholder="Enter YouTube or Similar service stream URL"
                             />
                         </div>
 
                         <div className="space-y-2">
                             <div className="flex items-center space-x-2">
                                 <Checkbox
-                                  id="isAffiliateEvent"
-                                  checked={isAffiliateEvent}
-                                  onCheckedChange={handleCheckboxChange}
+                                    id="isAffiliateEvent"
+                                    checked={isAffiliateEvent}
+                                    onCheckedChange={handleCheckboxChange}
                                 />
                                 <Label htmlFor="isAffiliateEvent">Enable Affiliate Program</Label>
                             </div>
 
                             {isAffiliateEvent && (
-                              <div className="mt-2">
-                                  <Label htmlFor="commission">Commission Percentage (%)</Label>
-                                  <Input
-                                    id="commission"
-                                    type="number"
-                                    value={commissionValue}
-                                    onChange={handleCommissionChange}
-                                    placeholder="Enter commission percentage"
-                                    min="0"
-                                    max="100"
-                                    step="0.01"
-                                    required={isAffiliateEvent}
-                                  />
-                              </div>
+                                <div className="mt-2">
+                                    <Label htmlFor="commission">Commission Percentage (%)</Label>
+                                    <Input
+                                        id="commission"
+                                        type="number"
+                                        value={commissionValue}
+                                        onChange={handleCommissionChange}
+                                        placeholder="Enter commission percentage"
+                                        min="0"
+                                        max="100"
+                                        step="0.01"
+                                        required={isAffiliateEvent}
+                                    />
+                                </div>
                             )}
                         </div>
 

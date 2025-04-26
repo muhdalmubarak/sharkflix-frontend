@@ -1,130 +1,96 @@
 import {USER_ROLES} from "@/app/utils/constants";
-import { Button } from "@/components/shadcn-ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { ShoppingCart } from "lucide-react";
-import { useRef, useState } from "react";
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,} from "@/components/ui/dialog";
+import {useRef, useState} from "react";
 import ReactPlayer from "react-player";
-import {PayHalalService} from '@/services/payhalal.service';
+import {generateMediaUrl} from "@/lib/utils";
 
 interface iAppProps {
-  title: string;
-  overview: string;
-  youtubeUrl: string;
-  state: boolean;
-  changeState: any;
-  release: number;
-  age: number;
-  duration: number;
-  user: any;
-}
-
-async function payment(
-    youtubeUrl: any,
-    userEmail: any,
-    price: any,
-) {
-  try {
-    window.location.href = await PayHalalService.initiateVideoPayment({
-      userEmail,
-      youtubeUrl,
-      price
-    });
-  } catch (error) {
-    console.error('Payment initialization failed:', error);
-  }
+    title: string;
+    overview: string;
+    youtubeUrl: string;
+    state: boolean;
+    changeState: any;
+    release: number;
+    age: number;
+    duration: number;
+    user: any;
+    movieId: number;
 }
 
 export default function PlayVideoModal({
-  changeState,
-  overview,
-  state,
-  title,
-  youtubeUrl,
-  age,
-  duration,
-  release,
-  user,
-}: iAppProps) {
-  const playerRef = useRef<ReactPlayer | null>(null);
+                                           changeState,
+                                           overview,
+                                           state,
+                                           title,
+                                           youtubeUrl,
+                                           age,
+                                           duration,
+                                           release,
+                                           user,
+                                           movieId
+                                       }: iAppProps) {
+    const playerRef = useRef<ReactPlayer | null>(null);
 
-  const handleProgress = (state: { playedSeconds: number }) => {
-    if (state.playedSeconds >= 8 && playerRef.current) {
-      playerRef.current.seekTo(0); // Loop back to 0 after 10 seconds
-    }
-  };
+    const handleProgress = (state: { playedSeconds: number }) => {
+        if (state.playedSeconds >= 8 && playerRef.current) {
+            playerRef.current.seekTo(0); // Loop back to 0 after 10 seconds
+        }
+    };
 
-  const handleSubmit = (youtubeUrl: any, userEmail: any, price: any) => {
-    payment(youtubeUrl, userEmail, price);
-  };
+    const [copied, setCopied] = useState(false);
 
-  const [copied, setCopied] = useState(false);
+    const handleCopyLink = () => {
+        let link = `${process.env.NEXT_PUBLIC_MAIN_DOMAIN_URL}/guest-user?movieId=` + movieId;
 
-  const getFileName = (url: any) => {
-    const parts = url.split("/");
-    return parts[parts.length - 1];
-  };
+        if (user?.role == USER_ROLES.AFFILIATE) {
+            link += `&refCode=${user?.AFFCode}`;
+        }
+        navigator.clipboard
+            .writeText(link)
+            .then(() => setCopied(true))
+            .catch((err) => console.error("Failed to copy link: ", err));
 
-  const handleCopyLink = () => {
-    let link =  `${process.env.NEXT_PUBLIC_MAIN_DOMAIN_URL}/guest-user?movie=` + getFileName(youtubeUrl);
+        setTimeout(() => setCopied(false), 2000); // Reset copied message after 2 seconds
+    };
 
-    if (user?.role == USER_ROLES.AFFILIATE) {
-      link += `&refCode=${user?.AFFCode}`;
-    }
-    navigator.clipboard
-      .writeText(link)
-      .then(() => setCopied(true))
-      .catch((err) => console.error("Failed to copy link: ", err));
+    return (
+        <Dialog open={state} onOpenChange={() => changeState(!state)}>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>{title}</DialogTitle>
+                    <DialogDescription className="line-clamp-3">
+                        {overview}
+                    </DialogDescription>
+                    <div className="flex gap-x-2 items-center">
+                        <p>{release}</p>
+                        <p className="border py-0.5 px-1 border-gray-200 rounded">{age}+</p>
+                        <p>{duration}h</p>
+                    </div>
+                </DialogHeader>
 
-    setTimeout(() => setCopied(false), 2000); // Reset copied message after 2 seconds
-  };
+                <ReactPlayer
+                    config={{file: {attributes: {controlsList: "nodownload"}}}}
+                    ref={playerRef} // Reference for controlling the video
+                    url={generateMediaUrl(youtubeUrl)}
+                    width="100%"
+                    height="250px"
+                    controls
+                    onProgress={handleProgress} // Call when video progresses
+                />
 
-  return (
-    <Dialog open={state} onOpenChange={() => changeState(!state)}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription className="line-clamp-3">
-            {overview}
-          </DialogDescription>
-          <div className="flex gap-x-2 items-center">
-            <p>{release}</p>
-            <p className="border py-0.5 px-1 border-gray-200 rounded">{age}+</p>
-            <p>{duration}h</p>
-          </div>
-        </DialogHeader>
-
-        <ReactPlayer
-          config={{ file: { attributes: { controlsList: "nodownload" } } }}
-          ref={playerRef} // Reference for controlling the video
-          url={youtubeUrl}
-          width="100%"
-          height="250px"
-          controls
-          onProgress={handleProgress} // Call when video progresses
-        />
-
-        <p className="text-lg font-semibold text-white">
-          <span className="mr-2 text-yellow-400">🎬</span> Purchase to watch the
-          full video for
-          <br />
-          {/* <span className="text-yellow-500 dark:text-white ml-[38%]">🛒 {price || 0} MYR</span> */}
-        </p>
-        <button
-          onClick={handleCopyLink}
-          className="share-button bg-blue-500 text-white mt-2 px-4 py-2 rounded hover:bg-blue-600"
-        >
-          {copied ? "Link Copied!" : "Share Link"}
-        </button>
-        {/* <Button className="mt-4" variant="destructive" disabled={price ==  null} onClick={() => handleSubmit(youtubeUrl,userEmail,price)}>
-          <ShoppingCart className="mr-2" />Buy
-        </Button> */}
-      </DialogContent>
-    </Dialog>
-  );
+                <p className="text-lg font-semibold text-white">
+                    <span className="mr-2 text-yellow-400">🎬</span> Purchase to watch the
+                    full video for
+                    <br/>
+                    {/* <span className="text-yellow-500 dark:text-white ml-[38%]">🛒 {price || 0} MYR</span> */}
+                </p>
+                <button
+                    onClick={handleCopyLink}
+                    className="share-button bg-blue-500 text-white mt-2 px-4 py-2 rounded hover:bg-blue-600"
+                >
+                    {copied ? "Link Copied!" : "Share Link"}
+                </button>
+            </DialogContent>
+        </Dialog>
+    );
 }

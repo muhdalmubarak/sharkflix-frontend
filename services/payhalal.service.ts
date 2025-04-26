@@ -222,18 +222,31 @@ export class PayHalalService {
 
     static async initiateVideoPayment({
                                           userEmail,
-                                          youtubeUrl,
+                                          movieId,
                                           price
                                       }: {
         userEmail: string;
-        youtubeUrl: string;
+        movieId: number;
         price: number;
     }): Promise<string> {
+        if (!movieId) {
+            throw new Error('Movie ID is required');
+        }
+
+        // Ensure movieId is a valid number
+        const validatedMovieId = Number(movieId);
+        if (isNaN(validatedMovieId)) {
+            throw new Error('Invalid movie ID');
+        }
+
+        const timestamp = Date.now();
+        const orderId = `MOVIE_${validatedMovieId}_${timestamp}`;
+
         return this.createPaymentUrl({
             userEmail,
             amount: price,
             product_description: "Video Purchase",
-            order_id: youtubeUrl
+            order_id: orderId
         });
     }
 

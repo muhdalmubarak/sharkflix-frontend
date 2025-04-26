@@ -1,21 +1,15 @@
 // app/components/creator-components/CreateEventDialog.tsx
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/shadcn-ui/textarea";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Label } from "@/components/shadcn-ui/label";
-import { Checkbox } from "@/components/shadcn-ui/checkbox";
-import { supabase } from "@/lib/supabase/client";
+import {Button} from "@/components/ui/button";
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,} from "@/components/ui/dialog";
+import {Input} from "@/components/ui/input";
+import {Textarea} from "@/components/shadcn-ui/textarea";
+import {useState} from "react";
+import {useRouter} from "next/navigation";
+import {Label} from "@/components/shadcn-ui/label";
+import {Checkbox} from "@/components/shadcn-ui/checkbox";
+import {uploadToStorage} from "@/app/utils/uploader";
 
 export function CreateEventDialog() {
     const router = useRouter();
@@ -74,25 +68,9 @@ export function CreateEventDialog() {
         }
     };
 
-    // Add upload to Supabase function
-    const uploadToSupabase = async (file: File, path: string): Promise<string> => {
-        const { data, error } = await supabase.storage
-            .from('video_videohub')
-            .upload(path, file, {
-                cacheControl: "3600",
-                upsert: true,
-            });
-
-        if (error) {
-            throw new Error(error.message);
-        }
-
-        return `https://zdcryvewjhsccriuzltq.supabase.co/storage/v1/object/public/${data.fullPath}`;
-    };
-
     // Handle form input changes
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: value
@@ -149,21 +127,21 @@ export function CreateEventDialog() {
 
             if (imageFile) {
                 const normalizedImageName = normalizeFilename(imageFile.name);
-                const imagePath = `video_videohub/event-images/${normalizedImageName}`;
-                imageUrl = await uploadToSupabase(imageFile, imagePath);
+                const imagePath = `event-images/${normalizedImageName}`;
+                imageUrl = await uploadToStorage(imageFile, imagePath);
             }
 
             if (trailerFile) {
                 const normalizedTrailerName = normalizeFilename(trailerFile.name);
-                const trailerPath = `video_videohub/event-trailers/${normalizedTrailerName}`;
-                trailerUrl = await uploadToSupabase(trailerFile, trailerPath);
+                const trailerPath = `event-trailers/${normalizedTrailerName}`;
+                trailerUrl = await uploadToStorage(trailerFile, trailerPath);
             }
 
             // Upload recording file if provided
             if (recordingFile) {
                 const normalizedRecordingName = normalizeFilename(recordingFile.name);
-                const recordingPath = `video_videohub/event-recordings/${normalizedRecordingName}`;
-                recordingUrl = await uploadToSupabase(recordingFile, recordingPath);
+                const recordingPath = `event-recordings/${normalizedRecordingName}`;
+                recordingUrl = await uploadToStorage(recordingFile, recordingPath);
             }
 
             // Generate access code only if recording is provided and access is allowed
