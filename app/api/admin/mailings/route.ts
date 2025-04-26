@@ -1,7 +1,7 @@
 // app/api/admin/mailings/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
-import prisma from '@/app/utils/db';
+import prisma from "@/app/utils/db";
 import EmailQueueService from '@/services/emailQueue.service';
 import {authOptions} from "@/app/utils/auth";
 import {validateEmails} from "@/app/utils/validators";

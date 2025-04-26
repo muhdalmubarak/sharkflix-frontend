@@ -40,6 +40,8 @@ declare global {
     }
 }
 
-BigInt.prototype.toJSON = function () {
-    return this.toString()
+if (typeof BigInt !== "undefined" && !(BigInt.prototype as any).toJSON) {
+    (BigInt.prototype as any).toJSON = function () {
+        return this.toString();
+    };
 }

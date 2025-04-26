@@ -2,8 +2,8 @@ import {getServerSession} from "next-auth";
 import MovieVideo from "../components/MovieVideo";
 import RecentlyAdded from "../components/RecentlyAdded";
 import UpcomingEvents from "../components/UpcomingEvents";
-import {authOptions} from "../utils/auth";
-import prisma from "../utils/db";
+import {authOptions} from "@/app/utils/auth";
+import prisma from "@/app/utils/db";
 
 
 async function getUpcomingEvents(userId: number): Promise<any> {

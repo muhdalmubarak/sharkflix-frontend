@@ -1,4 +1,4 @@
-import prisma from "../utils/db";
+import prisma from "@/app/utils/db";
 import MovieButtons from "./MovieButtons";
 import {generateMediaUrl} from "@/lib/utils";
 

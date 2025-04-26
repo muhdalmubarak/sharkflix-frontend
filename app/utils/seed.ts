@@ -1,5 +1,5 @@
 // app/utils/seed.ts
-import prisma from "./db";
+import prisma from "@/app/utils/db";
 
 async function seedEvents() {
     try {

@@ -1,6 +1,6 @@
 // app/api/cron/check-notifications/route.ts
 import { NextResponse } from 'next/server';
-import prisma from '@/app/utils/db';
+import prisma from "@/app/utils/db";
 import { NotificationService } from '@/services/notification.service';
 
 export const dynamic = 'force-dynamic'; // or another appropriate dynamic setting

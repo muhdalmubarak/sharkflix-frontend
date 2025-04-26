@@ -1,4 +1,4 @@
-import prisma from "../../utils/db";
+import prisma from "@/app/utils/db";
 import {Tabs, TabsContent, TabsList, TabsTrigger,} from "@/components/shadcn-ui/tabs";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/shadcn-ui/card";
 import Image from "next/image";

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import prisma from "../../utils/db";
+import prisma from "@/app/utils/db";
 import { v4 as uuidv4 } from 'uuid';
 
 export default function SeedDatabase() {

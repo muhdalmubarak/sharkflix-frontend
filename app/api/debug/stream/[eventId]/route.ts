@@ -1,6 +1,6 @@
 // app/api/debug/stream/[eventId]/route.ts
 import { NextResponse } from 'next/server';
-import prisma from '@/app/utils/db';
+import prisma from "@/app/utils/db";
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/utils/auth';
 import {bigint} from "zod";

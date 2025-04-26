@@ -1,7 +1,7 @@
 // app/admin-home/layout.tsx
 import { getServerSession } from "next-auth";
 import { ReactNode } from "react";
-import { authOptions } from "../utils/auth";
+import {authOptions} from "@/app/utils/auth";
 import { redirect } from "next/navigation";
 import AdminNavbar from "../components/admin-components/AdminNavbar";
 import prisma from "@/app/utils/db";

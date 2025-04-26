@@ -1,6 +1,6 @@
 // app/api/preview-events/route.ts
 import { NextResponse } from 'next/server';
-import prisma from '@/app/utils/db';
+import prisma from "@/app/utils/db";
 import { headers } from 'next/headers';
 
 export const dynamic = 'force-dynamic'; // Disable static optimization

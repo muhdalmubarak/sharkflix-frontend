@@ -1,8 +1,8 @@
 import Image from "next/image";
-import prisma from "../../utils/db";
+import prisma from "@/app/utils/db";
 import {MovieCard} from "./MovieCard";
 import {getServerSession} from "next-auth";
-import {authOptions} from "../../utils/auth";
+import {authOptions} from "@/app/utils/auth";
 import {generateMediaUrl} from "@/lib/utils";
 
 async function getData(userId: number) {

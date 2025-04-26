@@ -5,7 +5,7 @@ import {authOptions} from "@/app/utils/auth";
 import prisma from "@/app/utils/db";
 
 export async function POST(request: Request) {
-    //try {
+    try {
         const session = await getServerSession(authOptions);
         if (!session?.user?.email) {
             return new Response("Unauthorized", {status: 401});
@@ -22,8 +22,8 @@ export async function POST(request: Request) {
         });
 
         return NextResponse.json(event);
-    // } catch (error) {
-    //     console.error("Error creating event:", error);
-    //     return new Response("Error creating event", {status: 500});
-    // }
+    } catch (error) {
+        console.error("Error creating event:", error);
+        return new Response("Error creating event", {status: 500});
+    }
 }

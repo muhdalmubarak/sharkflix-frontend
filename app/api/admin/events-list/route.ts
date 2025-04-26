@@ -1,7 +1,7 @@
 // app/api/admin/events-list/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
-import prisma from '@/app/utils/db';
+import prisma from "@/app/utils/db";
 import {authOptions} from "@/app/utils/auth";
 
 export async function GET(req: NextRequest) {

@@ -4,7 +4,7 @@ import RecentlyAdded from "../components/creator-components/RecentlyAdded";
 import { Toaster } from "sonner";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/utils/auth";
-import { USER_ROLES } from "../utils/constants";
+import {USER_ROLES} from "@/app/utils/constants";
 import AffiliateDashboard from "../components/creator-components/AffiliateDashboard";
 
 export default async function HomePage() {

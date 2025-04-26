@@ -5,7 +5,7 @@ import BackgroundImage from "../../public/steven-van-bTPP3jBnOb8-unsplash.jpg";
 import Logo from "../../public/Red and Black Simple Modern Apparel Sport Logo.png";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "../utils/auth";
+import {authOptions} from "@/app/utils/auth";
 
 export default async function AuthLayout({ children }: { children: ReactNode }) {
 

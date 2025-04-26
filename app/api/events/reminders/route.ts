@@ -1,6 +1,6 @@
 // app/api/events/reminders/route.ts
 import { NextResponse } from 'next/server';
-import prisma from '@/app/utils/db';
+import prisma from "@/app/utils/db";
 
 export async function POST(req: Request) {
     try {

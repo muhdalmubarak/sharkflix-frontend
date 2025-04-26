@@ -7,7 +7,7 @@ import CreatorDashboard from "../components/creator-components/CreatorDashboard"
 import { Toaster } from "sonner";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/utils/auth";
-import { USER_ROLES } from "../utils/constants";
+import {USER_ROLES} from "@/app/utils/constants";
 import {
   Tabs,
   TabsContent,
