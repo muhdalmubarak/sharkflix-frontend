@@ -3,6 +3,7 @@ import {PutObjectCommand, S3Client} from "@aws-sdk/client-s3";
 import {getServerSession} from "next-auth";
 import {authOptions} from "@/app/utils/auth";
 import {createHash} from "crypto";
+import {getSignedUrl} from "@aws-sdk/s3-request-presigner";
 
 // Create an S3 client instance
 const s3 = new S3Client({
@@ -21,17 +22,12 @@ export async function POST(req: Request) {
             return new NextResponse('Unauthorized', {status: 401});
         }
 
-        const formData = await req.formData();
-        const file = formData.get("file") as File;
-        const fileName = formData.get("fileName") as string;
-        const folder = formData.get("folder") as string;
-        const fileType = formData.get("fileType") as string;
+        const {fileName, folder, fileType} = await req.json();
 
-        if (!file || !fileName || !folder || !fileType) {
+        if (!fileName || !folder || !fileType) {
             throw new Error("Missing required parameters");
         }
 
-        const fileBuffer = Buffer.from(await file.arrayBuffer());
         const mediaSlug = process.env.NEXT_PUBLIC_MEDIA_SLUG ? process.env.NEXT_PUBLIC_MEDIA_SLUG + "/" : "";
         const userFolderHash = createHash("md5").update(session.user.id.toString()).digest("hex") + "/";
 
@@ -50,19 +46,11 @@ export async function POST(req: Request) {
         const command = new PutObjectCommand({
             Bucket: process.env.APP_AWS_S3_BUCKET_NAME!,
             Key: mediaSlug + key,
-            Body: fileBuffer,
             ContentType: fileType,
         });
 
-        const response = await s3.send(command);
-
-        if (response.$metadata.httpStatusCode === 200) {
-            return NextResponse.json({message: "File uploaded successfully", objectKey: key});
-        } else {
-            console.error("Upload failed:", response);
-            throw new Error("Upload failed");
-        }
-
+        const url = await getSignedUrl(s3, command, {expiresIn: 3600});
+        return NextResponse.json({message: "File uploaded successfully", url, objectKey: key});
     } catch (error) {
         console.error("Error uploading file:", error);
         return NextResponse.json({error: "Failed to upload file"}, {status: 500});
