@@ -21,7 +21,7 @@ let links: linkProps[] = [
     {name: "My Events", href: "/creator-home/events"},
     {name: "Trending", href: "/creator-home/movies"},
     {name: "Withdraw Funds", href: "/creator-home/payment-method"},
-    {name: "Load to Drive", href: "/creator-home/drive-upload"},
+    {name: "Storage", href: "/creator-home/storage"},
 ];
 const links_affiliate: linkProps[] = [
     {name: "Home", href: "/affiliate-home"},

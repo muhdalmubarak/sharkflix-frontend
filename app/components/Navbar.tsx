@@ -22,6 +22,7 @@ const links: linkProps[] = [
     { name: "Recommended Videos", href: "/home/movies" },
   { name: "Purchased Videos", href: "/home/user/list" },
   { name: "Purchased Tickets", href: "/home/events/my-tickets" },
+  {name: "Storage", href: "/home/storage"},
 ];
 
 export default function Navbar({session,userData}:{session:any,userData:any}) {
