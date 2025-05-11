@@ -21,12 +21,12 @@ let links: linkProps[] = [
     {name: "My Events", href: "/creator-home/events"},
     {name: "Trending", href: "/creator-home/movies"},
     {name: "Withdraw Funds", href: "/creator-home/payment-method"},
+    {name: "Load to Drive", href: "/creator-home/drive-upload"},
 ];
 const links_affiliate: linkProps[] = [
     {name: "Home", href: "/affiliate-home"},
     {name: "Affiliate Videos", href: "/affiliate-home/affiliate"},
     {name: "Affiliate Events", href: "/affiliate-home/events"},
-    {name: "Load to Drive", href: "/creator-home/drive-upload"},
 ];
 
 export default function Navbar({session, userData}: { session: any, userData: any }) {
