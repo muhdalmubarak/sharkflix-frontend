@@ -369,6 +369,19 @@ model EventNote {
   User      User?     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
+// This model contains storage plan for each user
+//| id | user_id | plan_type (Free/Personal/Enterprise) | quota_gb | start_date | end_date | status |
+model user_storage_plan {
+  id          BigInt    @id @default(autoincrement())
+  plan_type   String?
+  eventId     BigInt?
+  userId      BigInt?
+  createdAt   DateTime  @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
+  updatedAt   DateTime? @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
+  events      events?   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  User        User?     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
 enum device_type {
   webcam
   mobile

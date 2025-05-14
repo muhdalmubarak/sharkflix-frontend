@@ -7,11 +7,13 @@ import {getSignedUrl} from "@aws-sdk/s3-request-presigner";
 
 // Create an S3 client instance
 const s3 = new S3Client({
-    region: process.env.NEXT_PUBLIC_AWS_REGION, // your AWS region, e.g., 'us-east-1'
+    region: process.env.NEXT_PUBLIC_WASABI_REGION, // your AWS region, e.g., 'us-east-1'
+    endpoint: process.env.NEXT_PUBLIC_WASABI_ENDPOINT,
     credentials: {
-        accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID!,  // Your access key
-        secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY!, // Your secret key
+        accessKeyId: process.env.NEXT_PUBLIC_WASABI_ACCESS_KEY_ID!,  // Your access key
+        secretAccessKey: process.env.NEXT_PUBLIC_WASABI_SECRET_ACCESS_KEY!, // Your secret key
     },
+    forcePathStyle: true,
 });
 
 export async function POST(req: Request) {
@@ -44,7 +46,7 @@ export async function POST(req: Request) {
         const key = `${userFolderHash}${folder}/${nameWithoutExtension}${extension ? '.' + extension : ''}`;
 
         const command = new PutObjectCommand({
-            Bucket: process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME!,
+            Bucket: process.env.NEXT_PUBLIC_WASABI_BUCKET_NAME!,
             Key: mediaSlug + key,
             ContentType: fileType,
         });

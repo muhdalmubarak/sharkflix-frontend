@@ -1,5 +1,4 @@
 'use client'
-import { DriveUploadMethod } from "@/components/creator-dashboard/components/drive-upload";
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { DriveUploadMethod } from "@/components/creator-dashboard/components/drive-upload";
 
 type Plan = {
   name: string;
@@ -44,6 +44,7 @@ export default function StoragePage(): JSX.Element {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
+      <DriveUploadMethod />
       <h1 className="text-3xl font-bold mb-6">Storage Plan</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
