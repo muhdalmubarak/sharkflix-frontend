@@ -25,6 +25,7 @@ export function formatCustomDate(input: string | number | Date, formatStr: strin
 
 export function generateMediaUrl(path: string) {
     if (!path) return "";
-    const mediaSlug = process.env.NEXT_PUBLIC_MEDIA_SLUG ? "/" + process.env.NEXT_PUBLIC_MEDIA_SLUG : "";
-    return path.startsWith("http") ? path : `${process.env.NEXT_PUBLIC_MEDIA_DOMAIN_URL}${mediaSlug}/${path}`
+    //https://<your-bucket-name>.s3.<region>.amazonaws.com/c4ca4238a0b923820dcc509a6f75849b/thumbnails/ef6e84aec5aa557f5e40bfd55eba0b4d.png
+    console.log(path.startsWith("http") ? path : `https://${process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME}.s3.amazonaws.com/${process.env.NEXT_PUBLIC_MEDIA_SLUG}/${path}`)
+    return path.startsWith("http") ? path : `https://${process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME}.s3.amazonaws.com/${process.env.NEXT_PUBLIC_MEDIA_SLUG}/${path}`
 }

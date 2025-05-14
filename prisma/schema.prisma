@@ -22,6 +22,7 @@ model User {
   instagram                                              String?
   linkedin                                               String?
   user_otp                                               String?
+  plan                                                   String?             @default("Free")
   current_balance                                        Decimal?            @default(0.00) @db.Decimal
   total_revenue                                          Decimal?            @default(0.00) @db.Decimal
   request_approved                                       Boolean             @default(true)

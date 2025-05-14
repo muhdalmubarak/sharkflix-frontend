@@ -15,6 +15,7 @@ CREATE TABLE "User" (
     "instagram" TEXT,
     "linkedin" TEXT,
     "user_otp" TEXT,
+    "plan" TEXT DEFAULT 'Free',
     "current_balance" DECIMAL DEFAULT 0.00,
     "total_revenue" DECIMAL DEFAULT 0.00,
     "request_approved" BOOLEAN NOT NULL DEFAULT true,

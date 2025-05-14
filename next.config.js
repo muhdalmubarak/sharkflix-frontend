@@ -13,6 +13,8 @@ const nextConfig = {
             protocol: "https", hostname: "zdcryvewjhsccriuzltq.supabase.co", port: "",
         }, {
             protocol: "https", hostname: "*.sharkv.my", port: "",
+        }, {
+            protocol: "https", hostname: "sharkv-dev.s3.amazonaws.com", port: ""
         }], // Add image optimization settings
         minimumCacheTTL: 60, deviceSizes: [640, 750, 828, 1080, 1200], imageSizes: [16, 32, 48, 64, 96],
     },
