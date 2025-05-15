@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {Button} from "@/components/ui/button";
@@ -12,17 +12,27 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {signOut} from "next-auth/react";
 import {generateMediaUrl} from "@/lib/utils";
+import { useState, useEffect } from "react";
 
 export default function UserNav({session, userData}: { session: any, userData: any }) {
-
-    const avatarUrl = generateMediaUrl('/user%20image/avatar.png');
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+    useEffect(() => {
+        generateMediaUrl('/user%20image/avatar.png')
+            .then((url) => {
+                setAvatarUrl(url);
+            })
+            .catch((error) => {
+                console.error('Error generating media URL:', error);
+                setAvatarUrl(null); // Set to null or a default image URL
+            });
+    })
 
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-sm">
                     <Avatar className="h-10 w-10 rounded-sm">
-                        <AvatarImage src={avatarUrl}/>
+                        <AvatarImage src={avatarUrl ?? ""}/>
                         <AvatarFallback
                             className="rounded-sm">{userData?.user?.name ? userData?.user?.name?.slice(0, 3) : 'User'}</AvatarFallback>
                     </Avatar>

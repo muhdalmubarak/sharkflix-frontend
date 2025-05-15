@@ -120,6 +120,21 @@ export default function FinalPage() {
         }
     };
 
+    // This is to get signed url from cloud
+    const [youtubeUrl, setYoutubeUrl] = useState<string | null>(null);
+    useEffect(() => {
+        if (movieData?.youtubeString) {
+            generateMediaUrl(movieData.youtubeString)
+                .then((url) => {
+                    setYoutubeUrl(url);
+                })
+                .catch((error) => {
+                    console.error("Error generating media URL:", error);
+                    setYoutubeUrl(null);
+                });
+        }
+    }, [movieData]);
+
     return (
         <div className="p-5 lg:p-0">
             <Dialog open={true}>
@@ -134,7 +149,7 @@ export default function FinalPage() {
                     <ReactPlayer
                         config={{file: {attributes: {controlsList: "nodownload"}}}}
                         ref={playerRef}
-                        url={generateMediaUrl(movieData?.youtubeString)}
+                        url={youtubeUrl ?? ""}
                         width="100%"
                         height="250px"
                         controls

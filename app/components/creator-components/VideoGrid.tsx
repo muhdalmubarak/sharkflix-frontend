@@ -8,15 +8,24 @@ interface VideoGridProps {
     videos: VideoData[];
 }
 
-export function VideoGrid({videos}: VideoGridProps) {
+export async function VideoGrid({videos}: VideoGridProps) {
+    const videoData = await Promise.all(
+        videos.map(async (video) => {
+            const imageString = await generateMediaUrl(video.imageString);
+            return {
+                ...video,
+                imageString,
+            };
+        })
+    );
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {videos.map((video) => (
+            {videoData.map(async (video) => (
                 <Card key={video.id}>
                     <CardContent className="p-0">
                         <div className="relative h-48">
                             <Image
-                                src={generateMediaUrl(video.imageString)}
+                                src={video.imageString}
                                 alt={video.title}
                                 fill
                                 className="rounded-t-lg object-cover"

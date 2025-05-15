@@ -55,6 +55,30 @@ const fetcher = async (url: string) => {
 
 
 const EventPreviewDialog = ({event, isOpen, onClose, onJoinEvent}: EventPreviewProps) => {
+    const [trailerUrl, setTrailerUrl] = useState<string | null>(null);
+    useEffect(() => {
+        generateMediaUrl(event.trailerUrl ?? "")
+            .then(url => {
+                setTrailerUrl(url);
+            })
+            .catch(err => {
+                console.error('Cannot generate trailer URL:', err);
+                setTrailerUrl(null);
+            })
+    }, [event.trailerUrl])
+
+    const [imageUrl, setImageUrl] = useState<string | null>(null);
+    useEffect(() => {
+        generateMediaUrl(event.imageUrl)
+            .then(url => {
+                setImageUrl(url);
+            })
+            .catch(err => {
+                console.error('Cannot generate image URL:', err);
+                setImageUrl(null);
+            })
+    }, [event.imageUrl])
+
     const formatDate = (date: string) => {
         try {
             return format(new Date(date), "MMM dd, yyyy - HH:mm");
@@ -72,7 +96,7 @@ const EventPreviewDialog = ({event, isOpen, onClose, onJoinEvent}: EventPreviewP
                 <div className={`relative w-full mb-4 ${event.trailerUrl ? 'aspect-video' : 'max-h-[70vh]'}`}>
                     {event.trailerUrl ? (
                         <iframe
-                            src={generateMediaUrl(event.trailerUrl)}
+                            src={trailerUrl ?? ""}
                             className="w-full h-full"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowFullScreen
@@ -80,7 +104,7 @@ const EventPreviewDialog = ({event, isOpen, onClose, onJoinEvent}: EventPreviewP
                     ) : (
                         <div className="flex justify-center">
                             <img
-                                src={generateMediaUrl(event.imageUrl)}
+                                src={imageUrl ?? ""}
                                 alt={event.title}
                                 className="max-h-[70vh] w-auto object-contain rounded-md"
                             />
@@ -174,63 +198,76 @@ const PreviewEvents: React.FC<PreviewEventsProps> = ({onGetStarted}) => {
                             </div>
                         ))
                     ) : (
-                        events.map((event, index) => (
-                            <div
-                                key={event.id}
-                                className={`flex-none w-[40%] md:w-[30%] bg-[#121212] rounded-lg overflow-hidden 
-                          transform transition-all duration-300 hover:scale-105 snap-center group
-                          ${index === 0 ? 'ml-0' : '-ml-4'}`}
-                                style={{
-                                    minWidth: '250px',
-                                    maxWidth: '300px'
-                                }}
-                            >
-                                <div className="aspect-[9/16] relative">
-                                    {/* Top 10 Badge */}
-                                    {event.isTopRated && <TopBadge/>}
+                        events.map((event, index) => {
+                            const [imageUrl, setImageUrl] = useState<string | null>(null);
+                            useEffect(() => {
+                                generateMediaUrl(event.imageUrl)
+                                    .then(url => {
+                                        setImageUrl(url);
+                                    })
+                                    .catch(err => {
+                                        console.error('Cannot generate image URL:', err);
+                                        setImageUrl(null);
+                                    });
+                            }, [event.imageUrl]);
+                            return (
+                                <div
+                                    key={event.id}
+                                    className={`flex-none w-[40%] md:w-[30%] bg-[#121212] rounded-lg overflow-hidden 
+                            transform transition-all duration-300 hover:scale-105 snap-center group
+                            ${index === 0 ? 'ml-0' : '-ml-4'}`}
+                                    style={{
+                                        minWidth: '250px',
+                                        maxWidth: '300px'
+                                    }}
+                                >
+                                    <div className="aspect-[9/16] relative">
+                                        {/* Top 10 Badge */}
+                                        {event.isTopRated && <TopBadge/>}
 
-                                    {/* Base Image */}
-                                    <Image
-                                        src={generateMediaUrl(event.imageUrl)}
-                                        alt={event.title}
-                                        fill
-                                        className="object-cover"
-                                        sizes="(max-width: 768px) 40vw, 30vw"
-                                        priority
-                                    />
+                                        {/* Base Image */}
+                                        <Image
+                                            src={imageUrl ?? ""}
+                                            alt={event.title}
+                                            fill
+                                            className="object-cover"
+                                            sizes="(max-width: 768px) 40vw, 30vw"
+                                            priority
+                                        />
 
-                                    {/* Hover Overlay */}
-                                    <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/60
-                                opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                        <button
-                                            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer
-                                hover:scale-110 transition-transform duration-200"
-                                            onClick={() => setSelectedEvent(event)}
-                                        >
-                                            <PlayCircle className="h-12 w-12 text-white"/>
-                                        </button>
+                                        {/* Hover Overlay */}
+                                        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/60
+                                    opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                            <button
+                                                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer
+                                    hover:scale-110 transition-transform duration-200"
+                                                onClick={() => setSelectedEvent(event)}
+                                            >
+                                                <PlayCircle className="h-12 w-12 text-white"/>
+                                            </button>
 
-                                        {/* Bottom Gradient and Content */}
-                                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3
-                                cursor-pointer">
-                                            <div className="flex justify-between items-end">
-                                                <div className="flex-1">
-                                                    <h3 className="text-white text-base font-semibold mb-1 line-clamp-1">
-                                                        {event.title}
-                                                    </h3>
-                                                    <p className="text-gray-300 text-xs">
-                                                        {formatEventDate(event.date)}
-                                                    </p>
+                                            {/* Bottom Gradient and Content */}
+                                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3
+                                    cursor-pointer">
+                                                <div className="flex justify-between items-end">
+                                                    <div className="flex-1">
+                                                        <h3 className="text-white text-base font-semibold mb-1 line-clamp-1">
+                                                            {event.title}
+                                                        </h3>
+                                                        <p className="text-gray-300 text-xs">
+                                                            {formatEventDate(event.date)}
+                                                        </p>
+                                                    </div>
+                                                    {/*<div className="flex items-center text-[#e50914] font-bold ml-2 text-sm">*/}
+                                                    {/*  <span>{event.price.toFixed(2)} MYR</span>*/}
+                                                    {/*</div>*/}
                                                 </div>
-                                                {/*<div className="flex items-center text-[#e50914] font-bold ml-2 text-sm">*/}
-                                                {/*  <span>{event.price.toFixed(2)} MYR</span>*/}
-                                                {/*</div>*/}
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))
+                            )
+                        })
                     )}
                 </div>
             </div>

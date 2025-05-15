@@ -1,5 +1,3 @@
-"use client";
-
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {Button} from "@/components/ui/button";
 import {
@@ -13,9 +11,9 @@ import {
 import {signOut} from "next-auth/react";
 import {generateMediaUrl} from "@/lib/utils";
 
-export default function AdminNav({session, userData}: { session: any, userData: any }) {
+export default async function AdminNav({session, userData}: { session: any, userData: any }) {
 
-    const avatarUrl = generateMediaUrl('/user%20image/avatar.png');
+    const avatarUrl = await generateMediaUrl('/user%20image/avatar.png');
 
     return (
         <DropdownMenu>

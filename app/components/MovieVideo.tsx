@@ -1,3 +1,5 @@
+'use server'
+
 import prisma from "@/app/utils/db";
 import MovieButtons from "./MovieButtons";
 import {generateMediaUrl} from "@/lib/utils";
@@ -68,6 +70,9 @@ async function movewVideos(userEmail: any, purchasedVideosUser: any) {
 
 export default async function MovieVideo(userEmail: any) {
     const data = await getData();
+    if (data?.imageString)
+        data.imageString = await generateMediaUrl(data?.imageString as string);
+
     let purchasedVideosUser;
     const purchasedVideosUse = await purchasedVideos(userEmail);
     purchasedVideosUser = purchasedVideosUse?.filter((v) => v.user_email == userEmail.userEmail) || []
@@ -76,11 +81,11 @@ export default async function MovieVideo(userEmail: any) {
     return (
         <div className="h-[55vh] lg:h-[60vh] w-full flex justify-start items-center">
             <video
-                poster={generateMediaUrl(data?.imageString as string)}
+                poster={data?.imageString as string}
                 autoPlay
                 muted
                 loop
-                src={generateMediaUrl(data?.videoSource as string)}
+                src={data?.videoSource as string}
                 className="w-full absolute top-0 left-0 h-[85vh] object-cover -z-10 brightness-[60%]"
             ></video>
 

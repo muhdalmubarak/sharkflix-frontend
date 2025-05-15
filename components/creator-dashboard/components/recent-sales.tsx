@@ -2,7 +2,7 @@
 import {Avatar, AvatarFallback, AvatarImage,} from "@/components/shadcn-ui/avatar"
 import {Eye} from 'lucide-react';
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/shadcn-ui/dialog";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {generateMediaUrl} from "@/lib/utils";
 
@@ -18,40 +18,68 @@ export function RecentSales({data}: { data: any }) {
     const [copied, setCopied] = useState(false);
 
     const handleCopyLink = () => {
-        navigator.clipboard.writeText(generateMediaUrl(selectedItem.youtubeString))
+        navigator.clipboard.writeText(youtubeUrl ?? "")
             .then(() => setCopied(true))
             .catch(err => console.error("Failed to copy link: ", err));
 
         setTimeout(() => setCopied(false), 2000); // Reset copied message after 2 seconds
     };
 
+    // This is to get signed url from cloud
+    const [youtubeUrl, setYoutubeUrl] = useState<string | null>(null);
+    useEffect(() => {
+        if (selectedItem?.youtubeString) {
+            generateMediaUrl(selectedItem.youtubeString)
+                .then((url) => {
+                    setYoutubeUrl(url);
+                })
+                .catch((error) => {
+                    console.error("Error generating media URL:", error);
+                    setYoutubeUrl(null);
+                });
+        }
+    }, [selectedItem.youtubeString]);
+
     return (
         <div className="space-y-8">
-            {data.map((item: any) => (
-                <div key={item.id} className="flex items-center" onClick={() => handleClick(item)}>
-                    <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
-                        <AvatarImage src={generateMediaUrl(item.imageString)} alt={item.title}/>
-                        <AvatarFallback>
-                            <img
-                                src={generateMediaUrl(item.imageString)}
-                                alt={item.title}
-                                className="h-full w-full object-cover"
-                            />
-                        </AvatarFallback>
-                    </Avatar>
-                    <div className="ml-4 space-y-1">
-                        <p className="text-sm font-medium leading-none">{item.title}</p>
-                        <p className="text-sm text-muted-foreground">
-                            {item.overview.slice(0, 40)}
-                        </p>
-                    </div>
-                    <div className="ml-auto font-medium inline-flex items-center">
-                        {item.age} <Eye className="ml-2"/>
-                    </div>
+            {data.map(async (item: any) => {
+                const [imageUrl, setImageUrl] = useState<string | null>(null);
+                useEffect(() => {
+                    generateMediaUrl(item.imageString)
+                        .then(url => {
+                            setImageUrl(url);
+                        })
+                        .catch(err => {
+                            console.error('Cannot generate image URL:', err);
+                            setImageUrl(null);
+                        })
+                }, [item.imageString]);
+                return (
+                    <div key={item.id} className="flex items-center" onClick={() => handleClick(item)}>
+                        <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
+                            <AvatarImage src={imageUrl ?? ""} alt={item.title}/>
+                            <AvatarFallback>
+                                <img
+                                    src={imageUrl ?? ""}
+                                    alt={item.title}
+                                    className="h-full w-full object-cover"
+                                />
+                            </AvatarFallback>
+                        </Avatar>
+                        <div className="ml-4 space-y-1">
+                            <p className="text-sm font-medium leading-none">{item.title}</p>
+                            <p className="text-sm text-muted-foreground">
+                                {item.overview.slice(0, 40)}
+                            </p>
+                        </div>
+                        <div className="ml-auto font-medium inline-flex items-center">
+                            {item.age} <Eye className="ml-2"/>
+                        </div>
 
-                    {/* Dialog */}
-                </div>
-            ))}
+                        {/* Dialog */}
+                    </div>
+                )
+        })}
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
@@ -68,7 +96,7 @@ export function RecentSales({data}: { data: any }) {
                         </div>
                     </DialogHeader>
                     <video controls height={250} className="w-full">
-                        <source src={generateMediaUrl(selectedItem.youtubeString)} type="video/quicktime"/>
+                        <source src={youtubeUrl ?? ''} type="video/quicktime"/>
                         Your browser does not support the video tag.
                     </video>
                     <Button

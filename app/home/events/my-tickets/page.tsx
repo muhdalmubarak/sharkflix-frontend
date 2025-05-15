@@ -43,14 +43,26 @@ async function getUserTickets(userId: number) {
 
 export default async function MyTicketsPage() {
     const session = await getServerSession(authOptions);
-    const tickets = await getUserTickets(session?.user?.id as number);
+    let tickets = await getUserTickets(session?.user?.id as number);
+    tickets = await Promise.all(
+        tickets.map(async (ticket: any) => {
+            const imageUrl = await generateMediaUrl(ticket.event.imageUrl);
+            return {
+                ...ticket,
+                event: {
+                    ...ticket.event,
+                    imageUrl,
+                },
+            };
+        })
+    );
 
     return (
       <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 py-10">
           <h1 className="text-3xl font-bold mb-8">My Tickets</h1>
 
           <div className="grid grid-cols-1 gap-6">
-              {tickets.map((ticket) => {
+              {tickets.map(async (ticket) => {
                   const eventDate = new Date(ticket?.event?.date || 0);
                   const now = new Date();
 
@@ -75,7 +87,7 @@ export default async function MyTicketsPage() {
                             <div className="relative w-full md:w-48 h-32">
                                 {ticket?.event?.imageUrl && (
                                   <Image
-                                    src={generateMediaUrl(ticket.event.imageUrl)}
+                                    src={ticket.event.imageUrl}
                                     alt={ticket.event.title}
                                     fill
                                     className="object-cover rounded-lg"

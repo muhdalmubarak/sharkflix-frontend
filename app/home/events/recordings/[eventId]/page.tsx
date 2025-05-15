@@ -75,13 +75,14 @@ export default async function RecordingPage({
       }
     } else {
       // User has direct access, no need for access code
+      recording.recordingUrl = await generateMediaUrl(recording.recordingUrl);
       return (
         <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 py-10">
           <h1 className="text-3xl font-bold mb-4">{recording.title}</h1>
           <p className="text-gray-400 mb-8">{recording.description}</p>
 
           <RecordingPlayer
-            recordingUrl={generateMediaUrl(recording.recordingUrl)}
+            recordingUrl={recording.recordingUrl}
             title={recording.title}
           />
         </div>
@@ -122,13 +123,14 @@ export default async function RecordingPage({
       }
 
       const data = await response.json();
+      data.recordingUrl = await generateMediaUrl(data.recordingUrl);
 
       return (
         <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 py-10">
           <h1 className="text-3xl font-bold mb-4">{data.title}</h1>
 
           <RecordingPlayer
-            recordingUrl={generateMediaUrl(data.recordingUrl)}
+            recordingUrl={data.recordingUrl}
             title={data.title}
           />
         </div>

@@ -70,7 +70,13 @@ export default async function Watchlist() {
     let purchasedVideosUser;
     const purchasedVideosUse = await purchasedVideos(userEmail);
     purchasedVideosUser = purchasedVideosUse?.filter((v) => v.user_email == userEmail) || []
-    const purchasedMoview = await movewVideos(userEmail, purchasedVideosUser);
+    let purchasedMoview = await movewVideos(userEmail, purchasedVideosUser);
+    purchasedMoview = await Promise.all(
+        purchasedMoview.map(async (movie: any) => {
+            movie.imageString = await generateMediaUrl(movie?.imageString as string);
+            return movie;
+        })
+    );
 
     return (
         <div className="w-full px-4 md:px-8 py-8">
@@ -80,7 +86,7 @@ export default async function Watchlist() {
 
             {purchasedMoview.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {purchasedMoview.map((movie) => (
+                    {purchasedMoview.map(async (movie) => (
                         <div
                             key={movie?.id}
                             className="bg-[#121212] rounded-lg overflow-hidden group
@@ -88,7 +94,7 @@ export default async function Watchlist() {
                         >
                             <div className="aspect-[16/9] relative w-full">
                                 <Image
-                                    src={generateMediaUrl(movie?.imageString as string)}
+                                    src={movie?.imageString as string}
                                     alt={movie?.title || "Movie"}
                                     fill
                                     className="object-cover"

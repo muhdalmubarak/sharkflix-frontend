@@ -121,14 +121,20 @@ export default async function CategoryPage({
     params: { genre: string };
 }) {
     const session = await getServerSession(authOptions);
-    const data = await getData(params.genre, session?.user?.id as number);
-    console.log(data);
+    let data = await getData(params.genre, session?.user?.id as number);
+    data = await Promise.all(data.map(async (movie: any) => {
+        const imageString = await generateMediaUrl(movie.imageString as string);
+        return {
+            ...movie,
+            imageString
+        };
+    }));
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 px-5 sm:px-0 mt-10 gap-6">
-            {data.map((movie: any) => (
+            {data.map(async (movie: any) => (
                 <div key={movie.id} className="relative h-60">
                     <Image
-                        src={generateMediaUrl(movie.imageString)}
+                        src={movie.imageString}
                         alt="Movie"
                         width={500}
                         height={400}
@@ -139,7 +145,7 @@ export default async function CategoryPage({
                         <div
                             className="bg-gradient-to-b from-transparent via-black/50 to-black z-10 w-full h-full rounded-lg flex items-center justify-center">
                             <Image
-                                src={generateMediaUrl(movie.imageString)}
+                                src={movie.imageString}
                                 alt="Movie"
                                 width={800}
                                 height={800}

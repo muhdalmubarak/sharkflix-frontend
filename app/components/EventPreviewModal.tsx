@@ -154,6 +154,31 @@ export function EventPreviewModal({
         return value.toFixed(2);
     };
 
+    // This is to get signed url from cloud
+    const [trailerRealUrl, setTrailerRealUrl] = useState<string | null>(null);
+    useEffect(() => {
+        generateMediaUrl(trailerUrl)
+            .then(url => {
+                setTrailerRealUrl(url);
+            })
+            .catch(err => {
+                console.error('Cannot generate trailer URL:', err);
+                setTrailerRealUrl(null);
+            });
+    }, [trailerUrl]);
+
+    const [imageRealUrl, setImageRealUrl] = useState<string | null>(null);
+    useEffect(() => {
+        generateMediaUrl(imageUrl)
+            .then(url => {
+                setImageRealUrl(url);
+            })
+            .catch(err => {
+                console.error('Cannot generate image URL:', err);
+                setImageRealUrl(null);
+            });
+    }, [imageUrl]);
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="w-[95%] max-w-5xl max-h-[90vh] overflow-y-auto sm:w-full">
@@ -166,7 +191,7 @@ export function EventPreviewModal({
                     <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-black">
                         {trailerUrl ? (
                             <ReactPlayer
-                                url={generateMediaUrl(trailerUrl)}
+                                url={trailerRealUrl ?? ""}
                                 width="100%"
                                 height="100%"
                                 controls
@@ -180,7 +205,7 @@ export function EventPreviewModal({
                             />
                         ) : (
                             <Image
-                                src={generateMediaUrl(imageUrl)}
+                                src={imageRealUrl ?? ""}
                                 alt={title}
                                 fill
                                 className="object-contain"

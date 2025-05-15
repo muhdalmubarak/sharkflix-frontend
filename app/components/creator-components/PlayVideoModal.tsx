@@ -1,6 +1,6 @@
 import {USER_ROLES} from "@/app/utils/constants";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,} from "@/components/ui/dialog";
-import {useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import ReactPlayer from "react-player";
 import {generateMediaUrl} from "@/lib/utils";
 
@@ -30,6 +30,20 @@ export default function PlayVideoModal({
                                            movieId
                                        }: iAppProps) {
     const playerRef = useRef<ReactPlayer | null>(null);
+    const [youtubeRealUrl, setYoutubeRealUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (youtubeUrl) {
+            generateMediaUrl(youtubeUrl)
+                .then((url) => {
+                    setYoutubeRealUrl(url);
+                })
+                .catch((error) => {
+                    console.error("Error generating media URL:", error);
+                    setYoutubeRealUrl(null);
+                });
+        }
+    }, [youtubeUrl]);
 
     const handleProgress = (state: { playedSeconds: number }) => {
         if (state.playedSeconds >= 8 && playerRef.current) {
@@ -71,7 +85,7 @@ export default function PlayVideoModal({
                 <ReactPlayer
                     config={{file: {attributes: {controlsList: "nodownload"}}}}
                     ref={playerRef} // Reference for controlling the video
-                    url={generateMediaUrl(youtubeUrl)}
+                    url={youtubeRealUrl ?? ""}
                     width="100%"
                     height="250px"
                     controls

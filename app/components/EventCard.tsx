@@ -1,7 +1,7 @@
 "use client";
 
 import {format} from "date-fns";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {PlayCircle} from "lucide-react";
 import {EventPreviewModal} from "@/app/components/EventPreviewModal";
 import Image from "next/image";
@@ -48,6 +48,18 @@ export function EventCard({
     const isBookingOpen = parsedBookingDate ? new Date() >= parsedBookingDate : false;
     const isCreator = currentUser?.role === 'creator';
 
+    const [imageRealUrl, setImageRealUrl] = useState<string | null>(null);
+    useEffect(() => {
+        generateMediaUrl(imageUrl)
+            .then(url => {
+                setImageRealUrl(url);
+            })
+            .catch(err => {
+                console.error('Cannot generate image URL:', err);
+                setImageRealUrl(null);
+            })
+    }, [imageUrl])
+
     const formatDate = (date: Date | string | null) => {
         if (!date) return 'Date not set';
         try {
@@ -69,7 +81,7 @@ export function EventCard({
 
             {/* Base Image */}
             <Image
-                src={generateMediaUrl(imageUrl)}
+                src={imageRealUrl ?? ""}
                 alt={title}
                 fill
                 className="object-cover"

@@ -196,6 +196,19 @@ export function RecordingPlayer({recordingUrl, title}: RecordingPlayerProps) {
         video.currentTime = Math.max(video.currentTime - 10, 0);
     };
 
+    // This is to get signed url from cloud
+    const [recordingRealUrl, setRecordingRealUrl] = useState<string | null>(null);
+    useEffect(() => {
+        generateMediaUrl(recordingUrl)
+            .then(url => {
+                setRecordingRealUrl(url);
+            })
+            .catch(err => {
+                console.error('Cannot generate recording URL:', err);
+                setRecordingRealUrl(null);
+            });
+    }, [recordingUrl]);
+
     return (
         <div
             ref={playerRef}
@@ -206,7 +219,7 @@ export function RecordingPlayer({recordingUrl, title}: RecordingPlayerProps) {
             {/* Video Element */}
             <video
                 ref={videoRef}
-                src={generateMediaUrl(recordingUrl)}
+                src={recordingRealUrl ?? ""}
                 className="w-full h-full"
                 onClick={togglePlay}
                 playsInline

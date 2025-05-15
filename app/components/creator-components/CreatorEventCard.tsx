@@ -2,13 +2,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcn-ui/card";
+import { Card, CardContent, CardHeader } from "@/components/shadcn-ui/card";
 import { format } from "date-fns";
 import {Edit, PlayCircle, Trash2} from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { EditEventDialog } from "./EditEventDialog";
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import { Video } from 'lucide-react';
 import {EventPreviewModal} from "@/app/components/EventPreviewModal";
 import { useSession } from "next-auth/react";
@@ -79,6 +79,19 @@ export function CreatorEventCard({ event, ticketsSold, revenue }: CreatorEventCa
     const eventNotEnded = new Date(event.date) > new Date();
     const canDelete = !(hasActiveTickets && eventNotEnded);
 
+    // This is to get signed url from cloud
+    const [imageRealUrl, setImageRealUrl] = useState<string | null>(null);
+    useEffect(() => {
+        generateMediaUrl(event.imageUrl)
+            .then(url => {
+                setImageRealUrl(url);
+            })
+            .catch(err => {
+                console.error('Cannot generate image URL:', err);
+                setImageRealUrl(null);
+            })
+    }, [event.imageUrl]);
+
     return (
         <>
             <Card className="w-full h-full flex flex-col bg-black/20 overflow-hidden">
@@ -90,7 +103,7 @@ export function CreatorEventCard({ event, ticketsSold, revenue }: CreatorEventCa
                         >
                             {event.imageUrl && (
                               <Image
-                                src={generateMediaUrl(event.imageUrl)}
+                                src={imageRealUrl ?? ""}
                                 alt={event.title}
                                 fill
                                 className="object-cover"

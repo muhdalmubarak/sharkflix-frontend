@@ -33,17 +33,27 @@ async function getData(userId: number) {
 
 export default async function Watchlist() {
     const session = await getServerSession(authOptions);
-    const data = await getData(session?.user?.id as number);
+    let data = await getData(session?.user?.id as number);
+    data = await Promise.all(data.map(async (movie: any) => {
+        const imageUrl = await generateMediaUrl(movie.Movie?.imageString as string);
+        return {
+            ...movie,
+            Movie: {
+                ...movie.Movie,
+                imageString: imageUrl,
+            },
+        };
+    }));
     return (
         <>
             <h1 className="text-white text-4xl font-bold underline mt-10 px-5 sm:px-0">
                 Your watchlist
             </h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 px-5 sm:px-0 mt-10 gap-6">
-                {data.map((movie: any) => (
+                {data.map(async (movie: any) => (
                     <div key={movie.Movie?.id} className="relative h-60">
                         <Image
-                            src={generateMediaUrl(movie.Movie?.imageString as string)}
+                            src={movie.Movie?.imageString as string}
                             alt="Movie"
                             width={500}
                             height={400}
@@ -54,7 +64,7 @@ export default async function Watchlist() {
                             <div
                                 className="bg-gradient-to-b from-transparent via-black/50 to-black z-10 w-full h-full rounded-lg flex items-center justify-center">
                                 <Image
-                                    src={generateMediaUrl(movie.Movie?.imageString as string)}
+                                    src={movie.Movie?.imageString as string}
                                     alt="Movie"
                                     width={800}
                                     height={800}

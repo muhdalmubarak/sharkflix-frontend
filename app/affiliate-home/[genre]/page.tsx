@@ -160,6 +160,16 @@ export default async function CategoryPage({
     const session = await getServerSession(authOptions);
     const result = await getData(params.genre, session?.user?.id as number);
 
+    result.data = await Promise.all(
+        result.data.map(async (movie: any) => {
+            const imageString = await generateMediaUrl(movie.imageString);
+            return {
+                ...movie,
+                imageString,
+            };
+        })
+    );
+
     // Create currentUser object from session data
     const currentUser = session?.user ? {
         role: session.user.role,
@@ -173,15 +183,15 @@ export default async function CategoryPage({
             {result.type === 'movies' ? (
                 // Grid for movies - Horizontal layout (16:9)
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {result.data.map((movie: any) => (
+                    {result.data.map(async (movie: any) => (
                         <div
                             key={movie.id}
                             className="bg-[#121212] rounded-lg overflow-hidden group
-                      relative transform transition-all duration-300"
+                    relative transform transition-all duration-300"
                         >
                             <div className="aspect-[16/9] relative w-full">
                                 <Image
-                                    src={generateMediaUrl(movie.imageString)}
+                                    src={movie.imageString}
                                     alt={movie.title || "Movie"}
                                     fill
                                     className="object-cover"
@@ -191,7 +201,7 @@ export default async function CategoryPage({
                                 />
 
                                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100
-                           transition-all duration-300 transform group-hover:scale-105">
+                        transition-all duration-300 transform group-hover:scale-105">
                                     <MovieCard
                                         key={movie.id}
                                         age={movie.age}
@@ -208,21 +218,22 @@ export default async function CategoryPage({
                                 </div>
                             </div>
                         </div>
-                    ))}
+                        )
+                    )}
                 </div>
             ) : (
                 // Grid for events - Vertical layout (9:16)
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                    {result.data.map((event: any) => (
+                    {result.data.map(async (event: any) => (
                         <div
                             key={event.id}
                             className="bg-[#121212] rounded-lg overflow-hidden group
-                      relative transform transition-all duration-300"
+                    relative transform transition-all duration-300"
                         >
                             <div className="aspect-[9/16] relative w-full">
                                 <div className="absolute inset-0">
                                     <Image
-                                        src={generateMediaUrl(event.imageUrl)}
+                                        src={event.imageString}
                                         alt={event.title}
                                         fill
                                         className="object-cover rounded-lg"
@@ -233,7 +244,7 @@ export default async function CategoryPage({
                                 </div>
 
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/90
-                             opacity-0 group-hover:opacity-100 transition-all duration-300">
+                            opacity-0 group-hover:opacity-100 transition-all duration-300">
                                     <EventCard
                                         id={event.id}
                                         title={event.title}
