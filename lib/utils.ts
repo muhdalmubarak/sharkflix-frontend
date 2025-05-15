@@ -25,10 +25,15 @@ export function formatCustomDate(input: string | number | Date, formatStr: strin
 
 export async function generateMediaUrl(path: string) {
     if (!path) return "";
-    const response = await fetch(`/api/get-media-url?key=${encodeURIComponent(path)}`);
-    if (!response.ok) throw new Error("Failed to get image URL");
-    const { url } = await response.json();
-    return url;
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_MAIN_DOMAIN_URL}/api/get-media-url?key=${encodeURIComponent(path)}`);
+        if (!response.ok) throw new Error("Failed to get image URL");
+        const { url } = await response.json();
+        return url;
+    } catch (error) {
+        console.error("Error fetching media URL:", error);
+    }
+    return "";
     /*
     return path.startsWith("http") ? path : `${process.env.NEXT_PUBLIC_WASABI_ENDPOINT}/${process.env.NEXT_PUBLIC_WASABI_BUCKET_NAME}/${process.env.NEXT_PUBLIC_MEDIA_SLUG}/${path}`
     */

@@ -98,8 +98,11 @@ export default async function CategoryPage({
   let data = await getData(params.genre, session?.user?.id as number);
   data = await Promise.all(
     data.map(async (movie: any) => {
-      movie.imageString = await generateMediaUrl(movie?.imageString as string);
-      return movie;
+      const imageString = await generateMediaUrl(movie?.imageString);
+      return {
+        ...movie,
+        imageString
+      };
     })
   );
 
