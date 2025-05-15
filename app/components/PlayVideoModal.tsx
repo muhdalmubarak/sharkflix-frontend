@@ -1,7 +1,7 @@
 import {Button} from "@/components/shadcn-ui/button";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,} from "@/components/ui/dialog";
 import {ShoppingCart} from "lucide-react";
-import {useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import ReactPlayer from "react-player";
 import {PayHalalService} from '@/services/payhalal.service';
 import {generateMediaUrl} from "@/lib/utils";
@@ -55,6 +55,20 @@ export default function PlayVideoModal({
     const [openPaymentPage, setOpenPaymentPage] = useState(false);
     const [paymentURL, setPaymentURL] = useState("");
     const playerRef = useRef<ReactPlayer | null>(null);
+    const [youtubeRealUrl, setYoutubeRealUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (youtubeUrl) {
+            generateMediaUrl(youtubeUrl)
+                .then((url) => {
+                    setYoutubeRealUrl(url);
+                })
+                .catch((error) => {
+                    console.error('Error generating media URL:', error);
+                    setYoutubeRealUrl(null);
+                });
+        }
+    }, [youtubeUrl])
 
     const handleProgress = (state: { playedSeconds: number }) => {
         if (!purchasedVideos) {
@@ -106,7 +120,7 @@ export default function PlayVideoModal({
                     <ReactPlayer
                         config={{file: {attributes: {controlsList: "nodownload"}}}}
                         ref={playerRef} // Reference for controlling the video
-                        url={generateMediaUrl(youtubeUrl)}
+                        url={youtubeRealUrl ?? ""}
                         width="100%"
                         height="250px"
                         controls

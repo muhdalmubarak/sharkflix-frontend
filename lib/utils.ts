@@ -23,9 +23,13 @@ export function formatCustomDate(input: string | number | Date, formatStr: strin
     return format(date, formatStr)
 }
 
-export function generateMediaUrl(path: string) {
+export async function generateMediaUrl(path: string) {
     if (!path) return "";
-    //https://<your-bucket-name>.s3.<region>.amazonaws.com/c4ca4238a0b923820dcc509a6f75849b/thumbnails/ef6e84aec5aa557f5e40bfd55eba0b4d.png
-    console.log(path.startsWith("http") ? path : `https://${process.env.NEXT_PUBLIC_WASABI_BUCKET_NAME}.s3.amazonaws.com/${process.env.NEXT_PUBLIC_MEDIA_SLUG}/${path}`)
-    return path.startsWith("http") ? path : `https://${process.env.NEXT_PUBLIC_WASABI_ENDPOINT}/${process.env.NEXT_PUBLIC_WASABI_BUCKET_NAME}/${process.env.NEXT_PUBLIC_MEDIA_SLUG}/${path}`
+    const response = await fetch(`/api/get-media-url?key=${encodeURIComponent(path)}`);
+    if (!response.ok) throw new Error("Failed to get image URL");
+    const { url } = await response.json();
+    return url;
+    /*
+    return path.startsWith("http") ? path : `${process.env.NEXT_PUBLIC_WASABI_ENDPOINT}/${process.env.NEXT_PUBLIC_WASABI_BUCKET_NAME}/${process.env.NEXT_PUBLIC_MEDIA_SLUG}/${path}`
+    */
 }

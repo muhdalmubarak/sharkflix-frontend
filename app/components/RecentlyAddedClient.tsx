@@ -53,39 +53,53 @@ const RecentlyAddedClient: React.FC<RecentlyAddedClientProps> = ({ data, userEma
     }
   };
 
-  const MovieItem = ({ movie }: { movie: Movie }) => (
-    <div className={`${isMobile ? 'flex-none w-[80%] snap-center' : 'w-full'} 
-                  bg-[#121212] rounded-lg overflow-hidden group
-                  transform transition-all duration-300 hover:scale-105`}>
-    <div className="aspect-[16/9] relative w-full">
-      <Image
-        src={generateMediaUrl(movie.imageString)}
-        alt={movie.title}
-        fill
-        className="object-cover"
-        quality={90}
-        sizes="(max-width: 768px) 80vw, (max-width: 1200px) 40vw, 25vw"
-        priority
-      />
+  const MovieItem = ({ movie }: { movie: Movie }) => {
+    const [imageUrl, setImageUrl] = useState<string | null>(null);
+    useEffect(() => {
+      generateMediaUrl(movie.imageString)
+        .then((url) => {
+          setImageUrl(url);
+        }
+        )
+        .catch((error) => {
+          console.error('Error generating media URL:', error);
+          setImageUrl(null);
+        }
+      );
+    }, [movie.imageString]);
+    return (
+      <div className={`${isMobile ? 'flex-none w-[80%] snap-center' : 'w-full'} 
+                    bg-[#121212] rounded-lg overflow-hidden group
+                    transform transition-all duration-300 hover:scale-105`}>
+      <div className="aspect-[16/9] relative w-full">
+        <Image
+          src={imageUrl ?? ''}
+          alt={movie.title}
+          fill
+          className="object-cover"
+          quality={90}
+          sizes="(max-width: 768px) 80vw, (max-width: 1200px) 40vw, 25vw"
+          priority
+        />
 
-      <MovieCard
-        movieId={movie.id}
-        overview={movie.overview}
-        title={movie.title}
-        wachtListId={String(movie.WatchLists[0]?.id)}
-        youtubeUrl={movie.youtubeString}
-        watchList={movie.WatchLists.length > 0}
-        key={movie.id}
-        age={movie.age}
-        time={movie.duration}
-        year={movie.release}
-        price={movie.price ?? 0}
-        userEmail={userEmail}
-        purchasedVideos={undefined}
-      />
+        <MovieCard
+          movieId={movie.id}
+          overview={movie.overview}
+          title={movie.title}
+          wachtListId={String(movie.WatchLists[0]?.id)}
+          youtubeUrl={movie.youtubeString}
+          watchList={movie.WatchLists.length > 0}
+          key={movie.id}
+          age={movie.age}
+          time={movie.duration}
+          year={movie.release}
+          price={movie.price ?? 0}
+          userEmail={userEmail}
+          purchasedVideos={undefined}
+        />
+      </div>
     </div>
-  </div>
-  );
+  )};
 
   if (data.length === 0) {
     return (
