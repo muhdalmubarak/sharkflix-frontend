@@ -46,6 +46,11 @@ interface VideoPurchaseData extends PaymentNotificationData {
   youtubeUrl: string;
 }
 
+interface StoragePurchaseData extends PaymentNotificationData {
+  plan_type: string;
+  total: number;
+}
+
 export class NotificationService {
   private static resend = new Resend(process.env.NEXT_PUBLIC_RESEND_API_KEY || "");
   private static fromEmail = "Sharkv <help@sharkv.my>";
@@ -317,6 +322,40 @@ export class NotificationService {
           transactionId: data.transactionId,
           amount: data.amount,
           youtubeUrl: data.youtubeUrl
+        }
+      });
+    }
+  }
+
+  static async notifyStoragePurchase(data: StoragePurchaseData) {
+    const template = {
+      subject: 'Storage Plan Upgrade Confirmation',
+      html: `
+                <h2 style="color: #007BFF; text-align: center;">Storage Purchase Successful</h2>
+                <div style="background: #f5f5f5; padding: 20px; border-radius: 5px; margin: 20px 0;">
+                    <p style="margin: 5px 0;"><strong>Storage Plan:</strong> ${data.plan_type}</p>
+                    <p style="margin: 5px 0;"><strong>Transaction ID:</strong> ${data.transactionId}</p>
+                </div>
+                <p style="font-size: 14px; color: #666; text-align: center;">
+                    You can now use ${data.total}GB.
+                </p>
+            `
+    };
+
+    await this.sendEmail(data.userEmail, template);
+
+    const userId = await this.getUserId(data.userEmail);
+    console.log(">>> Creating notification to", userId)
+    if (userId) {
+      await this.createNotification({
+        userId,
+        title: 'Storage Plan Upgrade Successful',
+        message: `Your storage plan upgrade was successful.`,
+        type: 'storage_purchased',
+        metadata: {
+          transactionId: data.transactionId,
+          plan_type: data.plan_type,
+          total: data.total
         }
       });
     }

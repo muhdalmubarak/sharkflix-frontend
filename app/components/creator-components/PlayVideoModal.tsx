@@ -54,7 +54,7 @@ export default function PlayVideoModal({
     const [copied, setCopied] = useState(false);
 
     const handleCopyLink = () => {
-        let link = `${process.env.NEXT_PUBLIC_MAIN_DOMAIN_URL}/guest-user?movieId=` + movieId;
+        let link = `${process.env.NEXT_PUBLIC_URL}/guest-user?movieId=` + movieId;
 
         if (user?.role == USER_ROLES.AFFILIATE) {
             link += `&refCode=${user?.AFFCode}`;

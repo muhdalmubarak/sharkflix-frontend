@@ -26,7 +26,7 @@ export function formatCustomDate(input: string | number | Date, formatStr: strin
 export async function generateMediaUrl(path: string) {
     if (!path) return "";
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_MAIN_DOMAIN_URL}/api/get-media-url?key=${encodeURIComponent(path)}`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/get-media-url?key=${encodeURIComponent(path)}`);
         if (!response.ok) throw new Error("Failed to get image URL");
         const { url } = await response.json();
         return url;

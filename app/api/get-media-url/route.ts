@@ -16,8 +16,6 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const key = searchParams.get("key");
 
-  console.log("Key:", key);
-
   if (!key) {
     return NextResponse.json({ error: "Missing key" }, { status: 400 });
   }

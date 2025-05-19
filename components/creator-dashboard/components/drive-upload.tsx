@@ -18,8 +18,9 @@ import {useSession} from "next-auth/react";
 import {Checkbox} from "@/components/shadcn-ui/checkbox";
 import {uploadToStorage} from "@/app/utils/uploader";
 import {useRouter} from "next/navigation";
+import { Plan } from "@/types/storage-plan";
 
-export function DriveUploadMethod() {
+export function DriveUploadMethod({currentPlan, onSuccess}: {currentPlan: Plan, onSuccess: () => void}) {
     const router = useRouter();
     const [videoFile, setVideoFile] = useState<File | null>(null);
     const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
@@ -81,6 +82,15 @@ export function DriveUploadMethod() {
             alert("Please select both video and thumbnail files");
             return;
         }
+        try {
+            if (currentPlan.used * 1024 + fileSize > currentPlan.total * 1024) {
+                alert("Storage limit exceeded. Please upgrade your plan.");
+                return;
+            }
+        } catch (error: any) {
+            console.error(error.message);
+            return;
+        }
 
         try {
             setIsUploading(true);
@@ -109,10 +119,11 @@ export function DriveUploadMethod() {
                 videoSource: videoUrl,
                 duration: 2.15,
                 price: price || 0,
-                userId: session?.user?.id as number,
+                //userId: session?.user?.id as number,
                 approval_status: "approved",
                 isaffiliate: isAffiliateVideo,
-                commissionPercentage: commissionValue === "" ? null : Number(commissionValue)
+                commissionPercentage: commissionValue === "" ? null : Number(commissionValue),
+                fileSize
             };
 
             const response = await fetch(`/api/movies`, {
@@ -129,7 +140,7 @@ export function DriveUploadMethod() {
             }
 
             onOpenChange(false);
-            router.refresh();
+            onSuccess();
             alert("Upload successful!");
         } catch (error) {
             console.error("Error uploading file: ", error);
@@ -160,8 +171,8 @@ export function DriveUploadMethod() {
                             y2="38.695"
                             gradientUnits="userSpaceOnUse"
                         >
-                            <stop offset="0" stop-color="#2aa4f4"></stop>
-                            <stop offset="1" stop-color="#007ad9"></stop>
+                            <stop offset="0" stopColor="#2aa4f4"></stop>
+                            <stop offset="1" stopColor="#007ad9"></stop>
                         </linearGradient>
                         <path
                             fill="url(#0ptTM7js1LRNIAHonm3lla_qZ1FibjKOsRJ_gr1)"

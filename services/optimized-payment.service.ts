@@ -100,6 +100,7 @@ export class OptimizedPaymentService {
             }
 
             // Process based on payment status
+            console.log('>>> Processing payment status:', data.status);
             switch (data.status.toUpperCase()) {
                 case 'SUCCESS':
                     return await this.processSuccessfulPayment(data);
@@ -158,6 +159,16 @@ export class OptimizedPaymentService {
         if (movieIdMatch) {
             const movieId = parseInt(movieIdMatch[1]);
             return this.processVideoPaymentCritical(tx, movieId, data);
+        }
+
+        // Handle storage purchase STORAGE_Personal_54534543545
+        const storagePlanMatch = effectiveOrderId.match(/STORAGE_([A-Za-z]+)_(\d+)_([A-Za-z]+)_(\d+)/);
+        if (storagePlanMatch) {
+            const storagePlan = storagePlanMatch[1];
+            const userId = storagePlanMatch[2];
+            const billingCycle = storagePlan[3];
+            console.log(">>> ", storagePlan, userId, billingCycle);
+            return this.processStoragePaymentCritical(tx, storagePlan, userId, billingCycle, data);
         }
 
         throw new Error(`Unrecognized order format: ${effectiveOrderId}`);
@@ -247,6 +258,23 @@ export class OptimizedPaymentService {
         ]);
 
         return {purchase, revenueResults};
+    }
+
+    private static async processStoragePaymentCritical(tx: any, storagePlan: string, userId: string, billingCycle: string, data: WebhookData) {
+        // Upgrade storage plan
+        const duration = billingCycle === 'monthly' ? 30 : 365;
+        const upgradedPlan = await tx.user_storage_plan.update({
+            where: {user_id: Number(userId)},
+            data: {
+                type: storagePlan,
+                total: storagePlan === 'Personal' ? 200 * 1024 : Infinity,
+                status: 'active',
+                start_date: new Date(),
+                end_date: new Date(Date.now() + duration * 24 * 60 * 60 * 1000),
+            }
+        });
+
+        return {storage: upgradedPlan};
     }
 
     private static async processVideoRevenueParallel(tx: any, movie: any, data: WebhookData, customerId: number) {

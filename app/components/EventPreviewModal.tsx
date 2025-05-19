@@ -72,7 +72,7 @@ export function EventPreviewModal({
     const isBookingAllowed = isBookingOpen && !soldOut && availableTickets > 0;
 
     useEffect(() => {
-        setShareLink(`${process.env.NEXT_PUBLIC_MAIN_DOMAIN_URL}/guest-event?eventId=${eventId}`);
+        setShareLink(`${process.env.NEXT_PUBLIC_URL}/guest-event?eventId=${eventId}`);
     }, [eventId]);
 
     // Update the handleShare function to use AFFCode

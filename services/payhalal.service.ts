@@ -1,6 +1,7 @@
 // services/payhalal.service.ts
 
 import {generatePayHalalPaymentHash} from '@/app/utils/hash';
+import { getServerSession } from 'next-auth';
 import {NextResponse} from "next/server";
 
 interface PayHalalConfig {
@@ -247,6 +248,80 @@ export class PayHalalService {
             amount: price,
             product_description: "Video Purchase",
             order_id: orderId
+        });
+    }
+
+    static async initiateStoragePayment({
+                                            userId,
+                                            userEmail,
+                                            customer_name,
+                                            customer_phone,
+                                            selectedPlan,
+                                            price,
+                                            billingCycle = "monthly",
+                                            useTestEndpoint = false
+                                        }: {
+        userId: number | null | undefined;
+        userEmail: string;
+        customer_name: string;
+        customer_phone: string;
+        selectedPlan: string | null;
+        price: number;
+        billingCycle?: "monthly" | "yearly";
+        useTestEndpoint?: boolean;
+    }): Promise<string> {
+        if (!selectedPlan) {
+            throw new Error('Selected plan is required');
+        }
+        if (price <= 0) {
+            throw new Error("Price must be greater than 0");
+        }
+        if (!userId) {
+            throw new Error("User session is invalid");
+        }
+
+        const timestamp = Date.now();
+        const orderId = `STORAGE_${selectedPlan}_${userId}_${billingCycle}_${timestamp}`;
+
+        return this.createPaymentUrl({
+            userEmail,
+            customer_name,
+            customer_phone,
+            amount: price,
+            product_description: `Upgrade Storage Plan - ${selectedPlan}`,
+            order_id: orderId,
+            useTestEndpoint
+        });
+    }
+
+    static async initiateTestStoragePayment({
+                                                userId,
+                                                userEmail,
+                                                customer_name,
+                                                customer_phone,
+                                                selectedPlan,
+                                                price,
+                                                billingCycle = "monthly",
+                                                useTestEndpoint = true
+                                            }: {
+        userId: number | null | undefined;
+        userEmail: string;
+        customer_name: string;
+        customer_phone: string;
+        selectedPlan: string | null;
+        price: number;
+        billingCycle?: "monthly" | "yearly";
+        useTestEndpoint?: boolean
+    }): Promise<string> {
+        return await this.initiateStoragePayment({
+            userId,
+            userEmail,
+            customer_name,
+            customer_phone,
+            selectedPlan,
+            price,
+            billingCycle,
+            useTestEndpoint
         });
     }
 

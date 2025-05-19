@@ -12,6 +12,8 @@ export const maxDuration = 1800; // This function can run for a maximum of 300 s
 const webhookCache = new Map<string, Promise<any>>();
 
 export async function POST(request: Request) {
+
+    console.log(">>> Test webhook received:", request.url);
     try {
         const formData = await request.formData();
         const transactionId = formData.get('transaction_id')?.toString();
@@ -31,6 +33,8 @@ export async function POST(request: Request) {
         webhookCache.set(cacheKey, processingPromise);
 
         const result = await processingPromise;
+
+        console.log(">>> Webhook result:", result);
 
         // Clear cache after processing
         setTimeout(() => webhookCache.delete(cacheKey), 60000);
@@ -85,6 +89,14 @@ async function queueNotifications(formData: FormData, data: any) {
                 youtubeUrl: generateMediaUrl(purchase.youtube_url)
             });
         }
+    } else if ('storage' in data) {
+        const {storage} = data;
+        await EmailQueueService.addToQueue('storage_purchase', {
+            userEmail: customerEmail,
+            transactionId: formData.get('transaction_id')?.toString() || '',
+            plan_type: storage.type,
+            total: storage.total
+        });
     }
 }
 

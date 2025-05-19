@@ -91,7 +91,7 @@ export default function PlayVideoModal({
 
     const handleCopyLink = () => {
         navigator.clipboard
-            .writeText(`${process.env.NEXT_PUBLIC_MAIN_DOMAIN_URL}/guest-user?movieId=` + movieId)
+            .writeText(`${process.env.NEXT_PUBLIC_URL}/guest-user?movieId=` + movieId)
             .then(() => setCopied(true))
             .catch((err) => console.error("Failed to copy link: ", err));
 

@@ -12,11 +12,27 @@ export async function POST(request: Request) {
         }
 
         const data = await request.json();
+        const {fileSize} = data;
+        delete data.fileSize;
 
         const movie = await prisma.movie.create({
             data: {
                 ...data,
-                userId: session.user?.id,
+                user: {
+                    connect: {
+                      id: Number(session.user?.id),
+                    },
+                },
+            },
+        });
+
+        console.log(">>>", session.user?.id, Number(fileSize));
+        await prisma.user_storage_plan.update({
+            where: {user_id: Number(session.user?.id)},
+            data: {
+                used: {
+                    increment: Number(fileSize)
+                }
             },
         });
 

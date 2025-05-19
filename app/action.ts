@@ -91,3 +91,28 @@ export async function updateVideo(formData: FormData) {
     revalidatePath(pathname);
 }
 
+export async function getStoragePlan() {
+    "use server";
+
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+        throw new Error("Unauthorized or missing user ID.");
+    }
+
+    try {
+        const storagePlan = await prisma.user_storage_plan.findUnique({
+            where: {
+                user_id: Number(session.user.id),
+            },
+            select: {
+                type: true,
+                total: true,
+                used: true
+            }
+        });
+
+        return storagePlan;
+    } catch(err) {
+        throw new Error("Failed to fetch storage plan.");
+    }
+}

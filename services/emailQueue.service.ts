@@ -79,6 +79,9 @@ class EmailQueueService {
       case 'video_purchase':
         await NotificationService.notifyVideoPurchase(email.data);
         break;
+      case 'storage_purchase':
+        await NotificationService.notifyStoragePurchase(email.data);
+        break;
       case 'event_reminder':
         await NotificationService.sendEventReminder(email.data);
         break;

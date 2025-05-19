@@ -44,6 +44,7 @@ model User {
   events                                                 events[]
   notifications                                          notifications[]
   tickets                                                tickets[]
+  storagePlans                                           user_storage_plan[]
 
   @@index([current_balance], map: "idx_user_current_balance")
   @@index([name], map: "idx_user_name")
@@ -372,19 +373,13 @@ model EventNote {
 // This model contains storage plan for each user
 model user_storage_plan {
   id          BigInt    @id @default(autoincrement())
-  plan_type   String?   @default("'Free'")
-  quota_gb
-  status
-  user_id     BigInt?
+  type        String?   @default("Free")
+  total       Int       @default(5120)
+  used        Float     @default(0)
+  status      String?
+  user_id     BigInt?   @unique
   start_date  DateTime  @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @db.Timestamptz(6)
   end_date    DateTime? 
-  User        User?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-}
-
-model storage_transaction_history {
-  id          BigInt    @id @default(autoincrement())
-  plan        String?   @default("'Free'")
-  user_id     BigInt?
   User        User?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 

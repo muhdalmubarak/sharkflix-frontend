@@ -106,6 +106,11 @@ export async function POST(req: Request) {
         affiliateCode,
       },
     });
+    await prisma.user_storage_plan.create({
+      data: {
+        user_id: newUser.id
+      },
+    });
 
     logger.log(`User created successfully. ID: ${newUser.id}`);
 

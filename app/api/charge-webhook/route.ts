@@ -83,6 +83,14 @@ async function queueNotifications(formData: FormData, data: any) {
                 youtubeUrl: generateMediaUrl(purchase.youtube_url)
             });
         }
+    } else if ('storage' in data) {
+        const {storage} = data;
+        await EmailQueueService.addToQueue('storage_purchase', {
+            userEmail: customerEmail,
+            transactionId: formData.get('transaction_id')?.toString() || '',
+            plan_type: storage.type,
+            total: storage.total,
+        });
     }
 }
 
